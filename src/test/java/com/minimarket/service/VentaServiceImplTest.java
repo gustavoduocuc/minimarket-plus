@@ -3,6 +3,7 @@ package com.minimarket.service;
 import com.minimarket.entity.DetalleVenta;
 import com.minimarket.entity.Producto;
 import com.minimarket.entity.Venta;
+import com.minimarket.exception.InsufficientStockException;
 import com.minimarket.repository.ProductoRepository;
 import com.minimarket.repository.VentaRepository;
 import com.minimarket.service.impl.VentaServiceImpl;
@@ -129,12 +130,15 @@ class VentaServiceImplTest {
     void testSave_StockInsuficiente_LanzaExcepcion() {
         detalle.setCantidad(50);
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-        
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+
+        InsufficientStockException exception = assertThrows(InsufficientStockException.class, () -> {
             ventaService.save(venta);
         });
-        assertTrue(exception.getMessage().contains("Stock insuficiente para producto: Café"));
-        
+        assertEquals("Café", exception.getProducto());
+        assertEquals(20, exception.getDisponible());
+        assertEquals(50, exception.getSolicitado());
+        assertTrue(exception.getClientMessage().contains("Solo quedan 20 unidades"));
+
         verify(productoRepository, never()).save(any(Producto.class));
         verify(ventaRepository, never()).save(any(Venta.class));
     }

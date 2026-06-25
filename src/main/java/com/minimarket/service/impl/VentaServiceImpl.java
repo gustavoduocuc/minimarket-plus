@@ -3,6 +3,7 @@ package com.minimarket.service.impl;
 import com.minimarket.entity.DetalleVenta;
 import com.minimarket.entity.Producto;
 import com.minimarket.entity.Venta;
+import com.minimarket.exception.InsufficientStockException;
 import com.minimarket.repository.ProductoRepository;
 import com.minimarket.repository.VentaRepository;
 import com.minimarket.service.VentaService;
@@ -54,7 +55,10 @@ public class VentaServiceImpl implements VentaService {
         for (DetalleVenta detalle : venta.getDetalles()) {
             Producto producto = findProductoForDetalle(detalle);
             if (producto.getStock() < detalle.getCantidad()) {
-                throw new IllegalStateException("Stock insuficiente para producto: " + producto.getNombre());
+                throw new InsufficientStockException(
+                        producto.getNombre(),
+                        producto.getStock(),
+                        detalle.getCantidad());
             }
         }
         for (DetalleVenta detalle : venta.getDetalles()) {
