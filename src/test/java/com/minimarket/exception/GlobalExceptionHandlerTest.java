@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class GlobalExceptionHandlerTest {
 
@@ -19,9 +20,24 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<Map<String, Object>> response = handler.handleInsufficientStock(exception);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Stock insuficiente para 'Café'. Solo quedan 3 unidades.", response.getBody().get("error"));
-        assertEquals("Café", response.getBody().get("producto"));
-        assertEquals(3, response.getBody().get("disponible"));
-        assertEquals(5, response.getBody().get("solicitado"));
+        Map<String, Object> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("Stock insuficiente para 'Café'. Solo quedan 3 unidades.", body.get("error"));
+        assertEquals("Café", body.get("producto"));
+        assertEquals(3, body.get("disponible"));
+        assertEquals(5, body.get("solicitado"));
+    }
+
+    @Test
+    void handleForbiddenOperationReturns403Response() {
+        ForbiddenOperationException exception =
+                new ForbiddenOperationException("Un cliente solo puede modificar su propio carrito");
+
+        ResponseEntity<Map<String, String>> response = handler.handleForbiddenOperation(exception);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        Map<String, String> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("Un cliente solo puede modificar su propio carrito", body.get("error"));
     }
 }

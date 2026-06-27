@@ -4,6 +4,7 @@ import com.minimarket.entity.*;
 import com.minimarket.exception.InsufficientStockException;
 import com.minimarket.repository.CarritoRepository;
 import com.minimarket.repository.ProductoRepository;
+import com.minimarket.repository.UsuarioRepository;
 import com.minimarket.service.impl.CarritoCheckoutServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -24,6 +26,9 @@ class CarritoCheckoutServiceImplTest {
 
     @Mock
     private UsuarioService usuarioService;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
 
     @Mock
     private CarritoRepository carritoRepository;
@@ -131,7 +136,7 @@ class CarritoCheckoutServiceImplTest {
         assertThrows(InsufficientStockException.class, () ->
                 carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO));
 
-        verify(carritoRepository, never()).delete(any());
+        verify(carritoRepository, never()).delete(requireNonNull(carrito));
     }
 
     @Test
@@ -143,7 +148,23 @@ class CarritoCheckoutServiceImplTest {
 
         carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO);
 
-        verify(carritoRepository).delete(carrito);
+        verify(carritoRepository).delete(requireNonNull(carrito));
+    }
+
+    @Test
+    void checkoutParaUsuario_concretaVentaDelTercero() {
+        when(usuarioRepository.findById(4L)).thenReturn(Optional.of(usuario));
+        when(carritoRepository.findByUsuarioId(4L)).thenReturn(Optional.of(carrito));
+        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+
+        Venta ventaGuardada = new Venta();
+        ventaGuardada.setId(99L);
+        when(ventaService.save(any(Venta.class))).thenReturn(ventaGuardada);
+
+        Venta resultado = carritoCheckoutService.checkoutParaUsuario(4L, MetodoPago.EFECTIVO);
+
+        assertEquals(99L, resultado.getId());
+        verify(carritoRepository).delete(requireNonNull(carrito));
     }
 
     @Test

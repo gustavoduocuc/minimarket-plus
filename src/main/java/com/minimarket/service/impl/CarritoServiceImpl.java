@@ -3,8 +3,10 @@ package com.minimarket.service.impl;
 import com.minimarket.entity.Carrito;
 import com.minimarket.entity.Producto;
 import com.minimarket.entity.Usuario;
+import com.minimarket.exception.ForbiddenOperationException;
 import com.minimarket.repository.CarritoRepository;
 import com.minimarket.repository.ProductoRepository;
+import com.minimarket.repository.UsuarioRepository;
 import com.minimarket.service.CarritoService;
 import com.minimarket.service.UsuarioService;
 import org.springframework.stereotype.Service;
@@ -12,34 +14,47 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 @Service
 public class CarritoServiceImpl implements CarritoService {
 
+    private static final Set<String> rolesStaff = Set.of("ADMIN", "GERENTE", "EMPLEADO");
+
     private final CarritoRepository carritoRepository;
     private final ProductoRepository productoRepository;
     private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
 
     public CarritoServiceImpl(
             CarritoRepository carritoRepository,
             ProductoRepository productoRepository,
-            UsuarioService usuarioService) {
+            UsuarioService usuarioService,
+            UsuarioRepository usuarioRepository) {
         this.carritoRepository = carritoRepository;
         this.productoRepository = productoRepository;
         this.usuarioService = usuarioService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
     @Transactional
-    public Carrito agregarProducto(String username, Long productoId, int cantidad) {
-        Usuario usuario = usuarioService.findByUsername(username)
+    public Carrito agregarProducto(String callerUsername, Long usuarioObjetivoId, Long productoId, int cantidad) {
+        Usuario caller = usuarioService.findByUsername(callerUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        Producto producto = productoRepository.findById(productoId)
+        Long objetivoId = usuarioObjetivoId != null ? usuarioObjetivoId : caller.getId();
+        validarPropiedadDelCarrito(caller, objetivoId);
+
+        Usuario usuarioObjetivo = resolverUsuarioObjetivo(caller, objetivoId);
+        Long productoIdValido = requireNonNull(productoId, "Producto inválido");
+        Producto producto = productoRepository.findById(productoIdValido)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado en BD"));
 
-        Carrito carrito = carritoRepository.findByUsuarioId(usuario.getId())
-                .orElseGet(() -> new Carrito(usuario));
+        Carrito carrito = carritoRepository.findByUsuarioId(objetivoId)
+                .orElseGet(() -> new Carrito(usuarioObjetivo));
 
         carrito.agregarProducto(producto, cantidad);
         return carritoRepository.save(carrito);
@@ -77,5 +92,23 @@ public class CarritoServiceImpl implements CarritoService {
             carrito.vaciar();
             carritoRepository.save(carrito);
         });
+    }
+
+    private void validarPropiedadDelCarrito(Usuario caller, Long objetivoId) {
+        if (!puedeGestionarCarritosAjenos(caller) && !objetivoId.equals(caller.getId())) {
+            throw new ForbiddenOperationException("Un cliente solo puede modificar su propio carrito");
+        }
+    }
+
+    private boolean puedeGestionarCarritosAjenos(Usuario usuario) {
+        return rolesStaff.stream().anyMatch(usuario::tieneRol);
+    }
+
+    private Usuario resolverUsuarioObjetivo(Usuario caller, Long objetivoId) {
+        if (objetivoId.equals(caller.getId())) {
+            return caller;
+        }
+        return usuarioRepository.findById(objetivoId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario objetivo no encontrado"));
     }
 }

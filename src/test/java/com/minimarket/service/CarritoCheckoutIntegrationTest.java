@@ -38,7 +38,7 @@ class CarritoCheckoutIntegrationTest {
 
         carritoRepository.findByUsuarioId(cliente.getId()).ifPresent(carritoRepository::delete);
 
-        carritoService.agregarProducto("cliente", producto.getId(), 1);
+        carritoService.agregarProducto("cliente", null, producto.getId(), 1);
 
         assertDoesNotThrow(() -> carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO));
     }

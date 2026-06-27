@@ -5,4 +5,5 @@ import com.minimarket.entity.Venta;
 
 public interface CarritoCheckoutService {
     Venta checkout(String username, MetodoPago metodoPago);
+    Venta checkoutParaUsuario(Long usuarioId, MetodoPago metodoPago);
 }

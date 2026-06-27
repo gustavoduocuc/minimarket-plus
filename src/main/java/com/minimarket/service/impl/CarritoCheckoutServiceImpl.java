@@ -3,6 +3,7 @@ package com.minimarket.service.impl;
 import com.minimarket.entity.*;
 import com.minimarket.repository.CarritoRepository;
 import com.minimarket.repository.ProductoRepository;
+import com.minimarket.repository.UsuarioRepository;
 import com.minimarket.service.CarritoCheckoutService;
 import com.minimarket.service.PaymentProcessor;
 import com.minimarket.service.UsuarioService;
@@ -18,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 public class CarritoCheckoutServiceImpl implements CarritoCheckoutService {
 
     private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
     private final CarritoRepository carritoRepository;
     private final ProductoRepository productoRepository;
     private final VentaService ventaService;
@@ -25,11 +27,13 @@ public class CarritoCheckoutServiceImpl implements CarritoCheckoutService {
 
     public CarritoCheckoutServiceImpl(
             UsuarioService usuarioService,
+            UsuarioRepository usuarioRepository,
             CarritoRepository carritoRepository,
             ProductoRepository productoRepository,
             VentaService ventaService,
             PaymentProcessor paymentProcessor) {
         this.usuarioService = usuarioService;
+        this.usuarioRepository = usuarioRepository;
         this.carritoRepository = carritoRepository;
         this.productoRepository = productoRepository;
         this.ventaService = ventaService;
@@ -39,12 +43,24 @@ public class CarritoCheckoutServiceImpl implements CarritoCheckoutService {
     @Override
     @Transactional
     public Venta checkout(String username, MetodoPago metodoPago) {
+        Usuario usuario = usuarioService.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        return checkoutCarritoDe(usuario, metodoPago);
+    }
+
+    @Override
+    @Transactional
+    public Venta checkoutParaUsuario(Long usuarioId, MetodoPago metodoPago) {
+        Long usuarioIdValido = requireNonNull(usuarioId, "Usuario inválido");
+        Usuario usuario = usuarioRepository.findById(usuarioIdValido)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        return checkoutCarritoDe(usuario, metodoPago);
+    }
+
+    private Venta checkoutCarritoDe(Usuario usuario, MetodoPago metodoPago) {
         if (metodoPago == null) {
             throw new IllegalArgumentException("El metodo de pago es obligatorio");
         }
-
-        Usuario usuario = usuarioService.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
         Carrito carrito = carritoRepository.findByUsuarioId(usuario.getId())
                 .orElseThrow(() -> new IllegalStateException("No hay productos en el carrito"));

@@ -46,23 +46,28 @@ public class CarritoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/checkout/{usuarioId}")
+    public ResponseEntity<CheckoutResponse> checkoutParaUsuario(
+            @PathVariable Long usuarioId,
+            @RequestBody CheckoutRequest request) {
+        Venta venta = carritoCheckoutService.checkoutParaUsuario(usuarioId, request.getMetodoPago());
+        return ResponseEntity.status(HttpStatus.CREATED).body(buildCheckoutResponse(venta));
+    }
+
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponse> checkout(@RequestBody CheckoutRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Venta venta = carritoCheckoutService.checkout(username, request.getMetodoPago());
-        CheckoutResponse response = new CheckoutResponse(
-                venta.getId(),
-                venta.getMetodoPago(),
-                venta.getEstadoPago(),
-                venta.calculateTotal());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(buildCheckoutResponse(venta));
     }
 
     @PostMapping
     public Carrito agregarProductoAlCarrito(@RequestBody AgregarItemCarritoRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long usuarioObjetivoId = request.getUsuario() != null ? request.getUsuario().getId() : null;
         return carritoService.agregarProducto(
                 username,
+                usuarioObjetivoId,
                 request.getProducto().getId(),
                 request.getCantidad());
     }
@@ -79,5 +84,13 @@ public class CarritoController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         carritoService.vaciarCarrito(username);
         return ResponseEntity.noContent().build();
+    }
+
+    private CheckoutResponse buildCheckoutResponse(Venta venta) {
+        return new CheckoutResponse(
+                venta.getId(),
+                venta.getMetodoPago(),
+                venta.getEstadoPago(),
+                venta.calculateTotal());
     }
 }

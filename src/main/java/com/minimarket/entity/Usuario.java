@@ -57,4 +57,12 @@ public class Usuario {
     public void setRoles(Set<Rol> roles) {
         this.roles = roles;
     }
+
+    public boolean tieneRol(String nombre) {
+        if (roles == null) {
+            return false;
+        }
+        return roles.stream()
+                .anyMatch(rol -> nombre.equals(rol.getNombre()));
+    }
 }

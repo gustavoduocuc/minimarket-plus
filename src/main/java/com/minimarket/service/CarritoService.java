@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CarritoService {
-    Carrito agregarProducto(String username, Long productoId, int cantidad);
+    Carrito agregarProducto(String callerUsername, Long usuarioObjetivoId, Long productoId, int cantidad);
     Optional<Carrito> obtenerCarritoDe(String username);
     List<Carrito> findAll();
     Optional<Carrito> findById(Long id);

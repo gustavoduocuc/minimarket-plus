@@ -52,6 +52,13 @@ public class GlobalExceptionHandler {
                         "solicitado", ex.getSolicitado()));
     }
 
+    @ExceptionHandler(ForbiddenOperationException.class)
+    public ResponseEntity<Map<String, String>> handleForbiddenOperation(ForbiddenOperationException ex) {
+        log.warn("Operacion prohibida: {}", ex.getClientMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", ex.getClientMessage()));
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, String>> handleBusinessRule(IllegalStateException ex) {
         log.warn("Regla de negocio violada: {}", ex.getMessage());
