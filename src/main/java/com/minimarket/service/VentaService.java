@@ -9,4 +9,6 @@ public interface VentaService {
     Venta findById(Long id);
     Venta save(Venta venta);
     List<Venta> findByUsuarioId(Long usuarioId);
+    List<Venta> findPendientesDePago();
+    Venta confirmarPago(Long ventaId);
 }

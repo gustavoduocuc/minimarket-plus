@@ -52,4 +52,14 @@ class VentaTest {
 
         assertEquals(350.0, venta.calculateTotal());
     }
+
+    @Test
+    void storesMetodoPagoAndEstadoPago() {
+        Venta venta = new Venta();
+        venta.setMetodoPago(MetodoPago.DEBITO);
+        venta.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
+
+        assertEquals(MetodoPago.DEBITO, venta.getMetodoPago());
+        assertEquals(EstadoPago.PENDIENTE_PAGO, venta.getEstadoPago());
+    }
 }

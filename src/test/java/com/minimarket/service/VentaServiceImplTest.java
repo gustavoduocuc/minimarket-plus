@@ -1,8 +1,10 @@
 package com.minimarket.service;
 
 import com.minimarket.entity.DetalleVenta;
+import com.minimarket.entity.EstadoPago;
 import com.minimarket.entity.Producto;
 import com.minimarket.entity.Venta;
+import com.minimarket.exception.InsufficientStockException;
 import com.minimarket.repository.ProductoRepository;
 import com.minimarket.repository.VentaRepository;
 import com.minimarket.service.impl.VentaServiceImpl;
@@ -15,10 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,13 +89,13 @@ class VentaServiceImplTest {
     @Test
     void testSave_VentaSinDetalles_GuardaDirecto() {
         venta.setDetalles(null);
-        when(ventaRepository.save(venta)).thenReturn(venta);
+        when(ventaRepository.save(Objects.requireNonNull(venta))).thenReturn(venta);
         
         Venta resultado = ventaService.save(venta);
         
         assertNotNull(resultado);
         verify(productoRepository, never()).findById(anyLong());
-        verify(ventaRepository, times(1)).save(venta);
+        verify(ventaRepository, times(1)).save(Objects.requireNonNull(venta));
     }
 
     @Test
@@ -129,28 +132,32 @@ class VentaServiceImplTest {
     void testSave_StockInsuficiente_LanzaExcepcion() {
         detalle.setCantidad(50);
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-        
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+
+        InsufficientStockException exception = assertThrows(InsufficientStockException.class, () -> {
             ventaService.save(venta);
         });
-        assertTrue(exception.getMessage().contains("Stock insuficiente para producto: Café"));
-        
-        verify(productoRepository, never()).save(any(Producto.class));
-        verify(ventaRepository, never()).save(any(Venta.class));
+        assertEquals("Café", exception.getProducto());
+        assertEquals(20, exception.getDisponible());
+        assertEquals(50, exception.getSolicitado());
+        assertTrue(exception.getClientMessage().contains("Solo quedan 20 unidades"));
+
+        verify(productoRepository).findById(1L);
+        verifyNoMoreInteractions(productoRepository);
+        verifyNoInteractions(ventaRepository);
     }
 
     @Test
     void testSave_Exito_DescuentaStockYGuardaVenta() {
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-        when(ventaRepository.save(venta)).thenReturn(venta);
+        when(ventaRepository.save(Objects.requireNonNull(venta))).thenReturn(venta);
         
         Venta resultado = ventaService.save(venta);
         
         assertNotNull(resultado);
         assertEquals(15, producto.getStock()); 
         
-        verify(productoRepository, times(1)).save(producto);
-        verify(ventaRepository, times(1)).save(venta);
+        verify(productoRepository, times(1)).save(Objects.requireNonNull(producto));
+        verify(ventaRepository, times(1)).save(Objects.requireNonNull(venta));
     }
 
     @Test
@@ -159,5 +166,57 @@ class VentaServiceImplTest {
         List<Venta> resultados = ventaService.findByUsuarioId(10L);
         assertFalse(resultados.isEmpty());
         verify(ventaRepository, times(1)).findByUsuarioId(10L);
+    }
+
+    @Test
+    void findPendientesDePago_devuelveVentasEnEstadoPendiente() {
+        Venta pendiente = new Venta();
+        pendiente.setId(7L);
+        pendiente.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
+        when(ventaRepository.findByEstadoPago(EstadoPago.PENDIENTE_PAGO))
+                .thenReturn(Arrays.asList(pendiente));
+
+        List<Venta> resultados = ventaService.findPendientesDePago();
+
+        assertEquals(1, resultados.size());
+        assertEquals(7L, resultados.get(0).getId());
+        verify(ventaRepository).findByEstadoPago(EstadoPago.PENDIENTE_PAGO);
+    }
+
+    @Test
+    void confirmarPago_ventaInexistente_lanzaIllegalArgumentException() {
+        when(ventaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                ventaService.confirmarPago(99L));
+
+        assertTrue(exception.getMessage().contains("not found"));
+        verify(ventaRepository).findById(99L);
+        verifyNoMoreInteractions(ventaRepository);
+    }
+
+    @Test
+    void confirmarPago_ventaPendiente_marcaPagado() {
+        venta.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
+        when(ventaRepository.findById(1L)).thenReturn(Optional.of(venta));
+        when(ventaRepository.save(Objects.requireNonNull(venta))).thenReturn(venta);
+
+        Venta resultado = ventaService.confirmarPago(1L);
+
+        assertEquals(EstadoPago.PAGADO, resultado.getEstadoPago());
+        verify(ventaRepository).save(Objects.requireNonNull(venta));
+    }
+
+    @Test
+    void confirmarPago_ventaYaPagada_lanzaIllegalStateException() {
+        venta.setEstadoPago(EstadoPago.PAGADO);
+        when(ventaRepository.findById(1L)).thenReturn(Optional.of(venta));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                ventaService.confirmarPago(1L));
+
+        assertEquals("La venta ya fue pagada", exception.getMessage());
+        verify(ventaRepository).findById(1L);
+        verifyNoMoreInteractions(ventaRepository);
     }
 }

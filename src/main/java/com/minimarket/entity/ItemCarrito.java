@@ -4,15 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
-public class DetalleVenta {
+public class ItemCarrito {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "venta_id", nullable = false)
-    private Venta venta;
+    @JoinColumn(name = "carrito_id", nullable = false)
+    private Carrito carrito;
 
     @ManyToOne
     @JoinColumn(name = "producto_id", nullable = false)
@@ -21,10 +22,15 @@ public class DetalleVenta {
     @Column(nullable = false)
     private Integer cantidad;
 
-    @Column(nullable = false)
-    private Double precio;
+    protected ItemCarrito() {
+    }
 
-    // Getters y Setters
+    ItemCarrito(Carrito carrito, Producto producto, int cantidad) {
+        this.carrito = carrito;
+        this.producto = producto;
+        this.cantidad = cantidad;
+    }
+
     public Long getId() {
         return id;
     }
@@ -33,12 +39,12 @@ public class DetalleVenta {
         this.id = id;
     }
 
-    public Venta getVenta() {
-        return venta;
+    public Carrito getCarrito() {
+        return carrito;
     }
 
-    public void setVenta(Venta venta) {
-        this.venta = venta;
+    public void setCarrito(Carrito carrito) {
+        this.carrito = carrito;
     }
 
     public Producto getProducto() {
@@ -57,15 +63,7 @@ public class DetalleVenta {
         this.cantidad = cantidad;
     }
 
-    public Double getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(Double precio) {
-        this.precio = precio;
-    }
-
-    public double calculateSubtotal() {
-        return cantidad * precio;
+    void incrementarCantidad(int cantidad) {
+        this.cantidad += cantidad;
     }
 }

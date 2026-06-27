@@ -1,8 +1,10 @@
 package com.minimarket.service.impl;
 
 import com.minimarket.entity.DetalleVenta;
+import com.minimarket.entity.EstadoPago;
 import com.minimarket.entity.Producto;
 import com.minimarket.entity.Venta;
+import com.minimarket.exception.InsufficientStockException;
 import com.minimarket.repository.ProductoRepository;
 import com.minimarket.repository.VentaRepository;
 import com.minimarket.service.VentaService;
@@ -47,6 +49,24 @@ public class VentaServiceImpl implements VentaService {
         return ventaRepository.findByUsuarioId(usuarioId);
     }
 
+    @Override
+    public List<Venta> findPendientesDePago() {
+        return ventaRepository.findByEstadoPago(EstadoPago.PENDIENTE_PAGO);
+    }
+
+    @Override
+    public Venta confirmarPago(Long ventaId) {
+        Venta venta = findById(ventaId);
+        if (venta == null) {
+            throw new IllegalArgumentException("Venta con id " + ventaId + " not found");
+        }
+        if (venta.getEstadoPago() == EstadoPago.PAGADO) {
+            throw new IllegalStateException("La venta ya fue pagada");
+        }
+        venta.setEstadoPago(EstadoPago.PAGADO);
+        return ventaRepository.save(venta);
+    }
+
     private void validateAndDeductStock(Venta venta) {
         if (venta.getDetalles() == null || venta.getDetalles().isEmpty()) {
             return;
@@ -54,7 +74,10 @@ public class VentaServiceImpl implements VentaService {
         for (DetalleVenta detalle : venta.getDetalles()) {
             Producto producto = findProductoForDetalle(detalle);
             if (producto.getStock() < detalle.getCantidad()) {
-                throw new IllegalStateException("Stock insuficiente para producto: " + producto.getNombre());
+                throw new InsufficientStockException(
+                        producto.getNombre(),
+                        producto.getStock(),
+                        detalle.getCantidad());
             }
         }
         for (DetalleVenta detalle : venta.getDetalles()) {

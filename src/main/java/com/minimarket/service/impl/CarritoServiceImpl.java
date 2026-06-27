@@ -2,58 +2,80 @@ package com.minimarket.service.impl;
 
 import com.minimarket.entity.Carrito;
 import com.minimarket.entity.Producto;
+import com.minimarket.entity.Usuario;
 import com.minimarket.repository.CarritoRepository;
 import com.minimarket.repository.ProductoRepository;
 import com.minimarket.service.CarritoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.minimarket.service.UsuarioService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CarritoServiceImpl implements CarritoService {
 
-    @Autowired
-    private CarritoRepository carritoRepository;
+    private final CarritoRepository carritoRepository;
+    private final ProductoRepository productoRepository;
+    private final UsuarioService usuarioService;
 
-    @Autowired
-    private ProductoRepository productoRepository; // Agregado para validar stock
-
-    @Override
-    public List<Carrito> findAll() { return carritoRepository.findAll(); }
-
-    @Override
-    public Carrito findById(Long id) { return carritoRepository.findById(id).orElse(null); }
-
-    @Override
-    public void deleteById(Long id) { carritoRepository.deleteById(id); }
+    public CarritoServiceImpl(
+            CarritoRepository carritoRepository,
+            ProductoRepository productoRepository,
+            UsuarioService usuarioService) {
+        this.carritoRepository = carritoRepository;
+        this.productoRepository = productoRepository;
+        this.usuarioService = usuarioService;
+    }
 
     @Override
-    public List<Carrito> findByUsuarioId(Long usuarioId) { return carritoRepository.findByUsuarioId(usuarioId); }
+    @Transactional
+    public Carrito agregarProducto(String username, Long productoId, int cantidad) {
+        Usuario usuario = usuarioService.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-    @Override
-    public Carrito save(Carrito carrito) { return agregarProducto(carrito); }
-
-   
-    public Carrito agregarProducto(Carrito carrito) {
-        // 1. Validación de relación Producto-Usuario
-        if (carrito.getUsuario() == null || carrito.getUsuario().getId() == null) {
-            throw new IllegalArgumentException("Usuario asociado al carrito es inválido o nulo");
-        }
-
-        if (carrito.getProducto() == null || carrito.getProducto().getId() == null) {
-            throw new IllegalArgumentException("Producto inválido");
-        }
-
-        // 2. Prueba de disponibilidad de stock
-        Producto productoBD = productoRepository.findById(carrito.getProducto().getId())
+        Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado en BD"));
 
-        if (productoBD.getStock() < carrito.getCantidad()) {
-            throw new IllegalStateException("Stock insuficiente para el producto seleccionado");
-        }
+        Carrito carrito = carritoRepository.findByUsuarioId(usuario.getId())
+                .orElseGet(() -> new Carrito(usuario));
 
-        carrito.setProducto(productoBD);
+        carrito.agregarProducto(producto, cantidad);
         return carritoRepository.save(carrito);
+    }
+
+    @Override
+    public Optional<Carrito> obtenerCarritoDe(String username) {
+        return usuarioService.findByUsername(username)
+                .flatMap(usuario -> carritoRepository.findByUsuarioId(usuario.getId()));
+    }
+
+    @Override
+    public List<Carrito> findAll() {
+        return carritoRepository.findAll();
+    }
+
+    @Override
+    public Optional<Carrito> findById(Long id) {
+        return carritoRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public void quitarProducto(String username, Long productoId) {
+        Carrito carrito = obtenerCarritoDe(username)
+                .orElseThrow(() -> new IllegalStateException("No hay productos en el carrito"));
+        carrito.quitarProducto(productoId);
+        carritoRepository.save(carrito);
+    }
+
+    @Override
+    @Transactional
+    public void vaciarCarrito(String username) {
+        obtenerCarritoDe(username).ifPresent(carrito -> {
+            carrito.vaciar();
+            carritoRepository.save(carrito);
+        });
     }
 }

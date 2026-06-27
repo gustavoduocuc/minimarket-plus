@@ -41,6 +41,17 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientStock(InsufficientStockException ex) {
+        log.warn("Stock insuficiente al concretar compra: {}", ex.getClientMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of(
+                        "error", ex.getClientMessage(),
+                        "producto", ex.getProducto(),
+                        "disponible", ex.getDisponible(),
+                        "solicitado", ex.getSolicitado()));
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, String>> handleBusinessRule(IllegalStateException ex) {
         log.warn("Regla de negocio violada: {}", ex.getMessage());

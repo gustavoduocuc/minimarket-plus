@@ -1,5 +1,6 @@
 package com.minimarket.controller;
 
+import com.minimarket.dto.ConfirmarPagoResponse;
 import com.minimarket.entity.Venta;
 import com.minimarket.service.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,11 @@ public class VentaController {
         return ventaService.findAll();
     }
 
+    @GetMapping("/pendientes")
+    public List<Venta> listarVentasPendientes() {
+        return ventaService.findPendientesDePago();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Venta> obtenerVentaPorId(@PathVariable Long id) {
         Venta venta = ventaService.findById(id);
@@ -29,5 +35,12 @@ public class VentaController {
     @PostMapping
     public Venta guardarVenta(@RequestBody Venta venta) {
         return ventaService.save(venta);
+    }
+
+    @PostMapping("/{id}/confirmar-pago")
+    public ResponseEntity<ConfirmarPagoResponse> confirmarPago(@PathVariable Long id) {
+        Venta venta = ventaService.confirmarPago(id);
+        ConfirmarPagoResponse response = new ConfirmarPagoResponse(venta.getId(), venta.getEstadoPago());
+        return ResponseEntity.ok(response);
     }
 }

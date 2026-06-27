@@ -3,11 +3,13 @@ package com.minimarket.service;
 import com.minimarket.entity.Carrito;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CarritoService {
+    Carrito agregarProducto(String username, Long productoId, int cantidad);
+    Optional<Carrito> obtenerCarritoDe(String username);
     List<Carrito> findAll();
-    Carrito findById(Long id);
-    Carrito save(Carrito carrito);
-    void deleteById(Long id);
-    List<Carrito> findByUsuarioId(Long usuarioId);
+    Optional<Carrito> findById(Long id);
+    void quitarProducto(String username, Long productoId);
+    void vaciarCarrito(String username);
 }

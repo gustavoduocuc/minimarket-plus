@@ -81,7 +81,20 @@ class SecurityRbacIntegrationTest {
                 RbacScenario.of(HttpMethod.GET, "/api/carrito", TestRole.CLIENTE, AccessOutcome.AUTHORIZED),
                 RbacScenario.of(HttpMethod.GET, "/api/carrito", TestRole.EMPLEADO, AccessOutcome.FORBIDDEN),
                 RbacScenario.of(HttpMethod.GET, "/api/carrito", TestRole.GERENTE, AccessOutcome.FORBIDDEN),
-                RbacScenario.of(HttpMethod.GET, "/api/carrito", TestRole.ADMIN, AccessOutcome.AUTHORIZED)
+                RbacScenario.of(HttpMethod.GET, "/api/carrito", TestRole.ADMIN, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/todos", null, AccessOutcome.UNAUTHENTICATED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/todos", TestRole.CLIENTE, AccessOutcome.FORBIDDEN),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/todos", TestRole.EMPLEADO, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/todos", TestRole.GERENTE, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/todos", TestRole.ADMIN, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/999", null, AccessOutcome.UNAUTHENTICATED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/999", TestRole.CLIENTE, AccessOutcome.FORBIDDEN),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/999", TestRole.EMPLEADO, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/999", TestRole.GERENTE, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.GET, "/api/carrito/999", TestRole.ADMIN, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.POST, "/api/carrito/checkout", null, AccessOutcome.UNAUTHENTICATED),
+                RbacScenario.of(HttpMethod.POST, "/api/carrito/checkout", TestRole.CLIENTE, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.POST, "/api/carrito/checkout", TestRole.EMPLEADO, AccessOutcome.AUTHORIZED)
         );
     }
 
@@ -116,7 +129,12 @@ class SecurityRbacIntegrationTest {
                 RbacScenario.of(HttpMethod.POST, "/api/ventas", TestRole.CLIENTE, AccessOutcome.FORBIDDEN),
                 RbacScenario.of(HttpMethod.POST, "/api/ventas", TestRole.EMPLEADO, AccessOutcome.AUTHORIZED),
                 RbacScenario.of(HttpMethod.POST, "/api/ventas", TestRole.GERENTE, AccessOutcome.AUTHORIZED),
-                RbacScenario.of(HttpMethod.POST, "/api/ventas", TestRole.ADMIN, AccessOutcome.AUTHORIZED)
+                RbacScenario.of(HttpMethod.POST, "/api/ventas", TestRole.ADMIN, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.POST, "/api/ventas/1/confirmar-pago", null, AccessOutcome.UNAUTHENTICATED),
+                RbacScenario.of(HttpMethod.POST, "/api/ventas/1/confirmar-pago", TestRole.CLIENTE, AccessOutcome.FORBIDDEN),
+                RbacScenario.of(HttpMethod.POST, "/api/ventas/1/confirmar-pago", TestRole.EMPLEADO, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.POST, "/api/ventas/1/confirmar-pago", TestRole.GERENTE, AccessOutcome.AUTHORIZED),
+                RbacScenario.of(HttpMethod.POST, "/api/ventas/1/confirmar-pago", TestRole.ADMIN, AccessOutcome.AUTHORIZED)
         );
     }
 
