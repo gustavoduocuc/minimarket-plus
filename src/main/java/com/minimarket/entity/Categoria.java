@@ -1,6 +1,7 @@
 package com.minimarket.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -10,6 +11,7 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Schema(description = "Nombre de la categoría", example = "Lácteos")
     @Column(nullable = false, unique = true)
     private String nombre;
 

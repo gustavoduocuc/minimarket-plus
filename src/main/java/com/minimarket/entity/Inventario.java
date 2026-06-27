@@ -1,5 +1,6 @@
 package com.minimarket.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.util.Date;
 
@@ -13,11 +14,13 @@ public class Inventario {
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
+    @Schema(description = "Cantidad del movimiento", example = "10")
     @Column(nullable = false)
     private Integer cantidad;
 
+    @Schema(description = "Tipo de movimiento", example = "Entrada")
     @Column(nullable = false)
-    private String tipoMovimiento; // Ejemplo: "Entrada" o "Salida"
+    private String tipoMovimiento;
 
     @Column(nullable = false)
     private Date fechaMovimiento;

@@ -1,9 +1,16 @@
 package com.minimarket.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class AgregarItemCarritoRequest {
 
+    @Schema(description = "Usuario destino (opcional; solo staff puede indicar otro usuario)")
     private UsuarioRef usuario;
+
+    @Schema(description = "Producto a agregar")
     private ProductoRef producto;
+
+    @Schema(description = "Cantidad a agregar", example = "2")
     private Integer cantidad;
 
     public UsuarioRef getUsuario() {
@@ -30,7 +37,9 @@ public class AgregarItemCarritoRequest {
         this.cantidad = cantidad;
     }
 
+    @Schema(name = "UsuarioRef")
     public static class UsuarioRef {
+        @Schema(description = "ID del usuario", example = "4")
         private Long id;
 
         public Long getId() {
@@ -42,7 +51,9 @@ public class AgregarItemCarritoRequest {
         }
     }
 
+    @Schema(name = "ProductoRef")
     public static class ProductoRef {
+        @Schema(description = "ID del producto", example = "1")
         private Long id;
 
         public Long getId() {
