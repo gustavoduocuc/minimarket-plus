@@ -2,6 +2,7 @@ package com.minimarket.controller;
 
 import com.minimarket.dto.UsuarioRequestDto;
 import com.minimarket.dto.UsuarioResponseDto;
+import com.minimarket.hateoas.UsuarioModelAssembler;
 import com.minimarket.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,11 +14,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+import java.util.Objects;
 @Tag(name = "Usuarios", description = "Administración de usuarios del sistema")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
@@ -26,6 +28,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private UsuarioModelAssembler usuarioModelAssembler;
 
     @Operation(
             summary = "Listar usuarios",
@@ -36,8 +41,8 @@ public class UsuarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping
-    public List<UsuarioResponseDto> listarUsuarios() {
-        return usuarioService.findAll();
+    public CollectionModel<EntityModel<UsuarioResponseDto>> listarUsuarios() {
+        return usuarioModelAssembler.toCollectionModel(usuarioService.findAll());
     }
 
     @Operation(
@@ -50,8 +55,9 @@ public class UsuarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDto> obtenerUsuarioPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<UsuarioResponseDto>> obtenerUsuarioPorId(@PathVariable Long id) {
         return usuarioService.findById(id)
+                .map(usuarioModelAssembler::toModel)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -66,7 +72,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @PostMapping
-    public UsuarioResponseDto crearUsuario(
+    public EntityModel<UsuarioResponseDto> crearUsuario(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(examples = @ExampleObject(
                             name = "Nuevo empleado",
@@ -75,7 +81,7 @@ public class UsuarioController {
                                     "roles":["EMPLEADO"]}\
                                     """)))
             @Valid @RequestBody UsuarioRequestDto usuario) {
-        return usuarioService.create(usuario);
+        return usuarioModelAssembler.toModel(Objects.requireNonNull(usuarioService.create(usuario)));
     }
 
     @Operation(
@@ -89,12 +95,13 @@ public class UsuarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDto> actualizarUsuario(
+    public ResponseEntity<EntityModel<UsuarioResponseDto>> actualizarUsuario(
             @PathVariable Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(schema = @Schema(implementation = UsuarioRequestDto.class)))
             @Valid @RequestBody UsuarioRequestDto usuario) {
         return usuarioService.update(id, usuario)
+                .map(usuarioModelAssembler::toModel)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

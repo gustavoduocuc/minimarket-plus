@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.minimarket.entity.Inventario;
+import com.minimarket.hateoas.InventarioModelAssembler;
 import com.minimarket.service.InventarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,11 +12,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+import java.util.Objects;
 @Tag(name = "Inventario", description = "Movimientos de inventario")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
@@ -24,6 +26,9 @@ public class InventarioController {
 
     @Autowired
     private InventarioService inventarioService;
+
+    @Autowired
+    private InventarioModelAssembler inventarioModelAssembler;
 
     @Operation(
             summary = "Listar movimientos de inventario",
@@ -34,8 +39,8 @@ public class InventarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping
-    public List<Inventario> listarMovimientosDeInventario() {
-        return inventarioService.findAll();
+    public CollectionModel<EntityModel<Inventario>> listarMovimientosDeInventario() {
+        return inventarioModelAssembler.toCollectionModel(inventarioService.findAll());
     }
 
     @Operation(
@@ -48,9 +53,11 @@ public class InventarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Inventario> obtenerMovimientoPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Inventario>> obtenerMovimientoPorId(@PathVariable Long id) {
         Inventario inventario = inventarioService.findById(id);
-        return (inventario != null) ? ResponseEntity.ok(inventario) : ResponseEntity.notFound().build();
+        return (inventario != null)
+                ? ResponseEntity.ok(inventarioModelAssembler.toModel(inventario))
+                : ResponseEntity.notFound().build();
     }
 
     @Operation(
@@ -62,7 +69,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @PostMapping
-    public Inventario registrarMovimiento(
+    public EntityModel<Inventario> registrarMovimiento(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(examples = @ExampleObject(
                             name = "Entrada de stock",
@@ -71,7 +78,7 @@ public class InventarioController {
                                     "fechaMovimiento":"2026-06-27T12:00:00.000+00:00"}\
                                     """)))
             @RequestBody Inventario inventario) {
-        return inventarioService.save(inventario);
+        return inventarioModelAssembler.toModel(Objects.requireNonNull(inventarioService.save(inventario)));
     }
 
     @Operation(
@@ -84,7 +91,7 @@ public class InventarioController {
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Inventario> actualizarMovimiento(
+    public ResponseEntity<EntityModel<Inventario>> actualizarMovimiento(
             @PathVariable Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(schema = @Schema(implementation = Inventario.class)))
@@ -92,7 +99,8 @@ public class InventarioController {
         Inventario existente = inventarioService.findById(id);
         if (existente != null) {
             inventario.setId(id);
-            return ResponseEntity.ok(inventarioService.save(inventario));
+            Inventario inventarioActualizado = Objects.requireNonNull(inventarioService.save(inventario));
+            return ResponseEntity.ok(inventarioModelAssembler.toModel(inventarioActualizado));
         }
         return ResponseEntity.notFound().build();
     }
