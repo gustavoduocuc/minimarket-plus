@@ -3,6 +3,9 @@ package com.minimarket.controller;
 import com.minimarket.dto.StockDisponibleResponse;
 import com.minimarket.entity.Producto;
 import com.minimarket.hateoas.ProductoModelAssembler;
+import com.minimarket.openapi.HalExamples;
+import com.minimarket.openapi.ProductoCollectionDoc;
+import com.minimarket.openapi.ProductoResourceDoc;
 import com.minimarket.service.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +37,13 @@ public class ProductoController {
             summary = "Listar productos",
             description = "Público. Incluye stockDisponible calculado desde inventario.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de productos. Incluye enlaces HATEOAS en _links")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de productos en formato HAL (_embedded.productoList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoCollectionDoc.class),
+                            examples = @ExampleObject(name = "productosHal", value = HalExamples.PRODUCTO_COLLECTION)))
     })
     @GetMapping
     public CollectionModel<EntityModel<Producto>> listarProductos() {
@@ -63,7 +72,13 @@ public class ProductoController {
             summary = "Obtener producto por ID",
             description = "Público. Incluye stockDisponible calculado desde inventario.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Producto encontrado. Incluye enlaces HATEOAS en _links"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Producto encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoResourceDoc.class),
+                            examples = @ExampleObject(name = "productoHal", value = HalExamples.PRODUCTO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Producto no encontrado")
     })
     @GetMapping("/{id}")
@@ -78,7 +93,13 @@ public class ProductoController {
             summary = "Crear producto",
             description = "Roles: GERENTE, ADMIN. El stock se gestiona vía inventario (POST /api/inventario).")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Producto creado. Incluye enlaces HATEOAS en _links"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Producto creado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoResourceDoc.class),
+                            examples = @ExampleObject(name = "productoHal", value = HalExamples.PRODUCTO_RESOURCE))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
@@ -100,7 +121,13 @@ public class ProductoController {
             summary = "Actualizar producto",
             description = "Roles: GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Producto actualizado. Incluye enlaces HATEOAS en _links"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Producto actualizado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoResourceDoc.class),
+                            examples = @ExampleObject(name = "productoHal", value = HalExamples.PRODUCTO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")

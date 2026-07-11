@@ -27,6 +27,12 @@ public class OpenApiConfig {
                                 - **EMPLEADO**: operaciones de venta, inventario (lectura) y carrito de terceros.
                                 - **GERENTE**: gestión de catálogo, inventario y operaciones de staff.
                                 - **ADMIN**: acceso total, incluyendo gestión de usuarios.
+
+                                **HATEOAS (HAL):** las respuestas de Producto, Carrito, Inventario, Usuario y Venta \
+                                usan Hypertext Application Language.
+                                - Recurso individual (`EntityModel`): campos del dominio + `_links`.
+                                - Colección (`CollectionModel`): `_embedded.<nombreLista>` + `_links` de la colección.
+                                - Los enlaces de mutación (crear/actualizar/eliminar) solo aparecen según el rol del JWT.
                                 """))
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()

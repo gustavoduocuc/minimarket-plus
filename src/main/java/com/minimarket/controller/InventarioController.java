@@ -2,6 +2,9 @@ package com.minimarket.controller;
 
 import com.minimarket.entity.Inventario;
 import com.minimarket.hateoas.InventarioModelAssembler;
+import com.minimarket.openapi.HalExamples;
+import com.minimarket.openapi.InventarioCollectionDoc;
+import com.minimarket.openapi.InventarioResourceDoc;
 import com.minimarket.service.InventarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +37,13 @@ public class InventarioController {
             summary = "Listar movimientos de inventario",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de movimientos"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de movimientos en formato HAL (_embedded.inventarioList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = InventarioCollectionDoc.class),
+                            examples = @ExampleObject(name = "inventarioHal", value = HalExamples.INVENTARIO_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
@@ -47,7 +56,13 @@ public class InventarioController {
             summary = "Obtener movimiento por ID",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Movimiento encontrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Movimiento encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = InventarioResourceDoc.class),
+                            examples = @ExampleObject(name = "movimientoHal", value = HalExamples.INVENTARIO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Movimiento no encontrado"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
@@ -64,7 +79,13 @@ public class InventarioController {
             summary = "Registrar movimiento de inventario",
             description = "Roles: GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Movimiento registrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Movimiento registrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = InventarioResourceDoc.class),
+                            examples = @ExampleObject(name = "movimientoHal", value = HalExamples.INVENTARIO_RESOURCE))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
@@ -85,7 +106,13 @@ public class InventarioController {
             summary = "Actualizar movimiento de inventario",
             description = "Roles: GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Movimiento actualizado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Movimiento actualizado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = InventarioResourceDoc.class),
+                            examples = @ExampleObject(name = "movimientoHal", value = HalExamples.INVENTARIO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Movimiento no encontrado"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")

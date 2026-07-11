@@ -6,6 +6,9 @@ import com.minimarket.dto.CheckoutResponse;
 import com.minimarket.entity.Carrito;
 import com.minimarket.entity.Venta;
 import com.minimarket.hateoas.CarritoModelAssembler;
+import com.minimarket.openapi.CarritoCollectionDoc;
+import com.minimarket.openapi.CarritoResourceDoc;
+import com.minimarket.openapi.HalExamples;
 import com.minimarket.service.CarritoCheckoutService;
 import com.minimarket.service.CarritoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,7 +47,13 @@ public class CarritoController {
             summary = "Obtener carrito propio",
             description = "Roles: CLIENTE, ADMIN. Devuelve el carrito del usuario autenticado.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Carrito encontrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Carrito encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoResourceDoc.class),
+                            examples = @ExampleObject(name = "carritoHal", value = HalExamples.CARRITO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Carrito no existe"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
@@ -62,7 +71,13 @@ public class CarritoController {
             summary = "Listar todos los carritos",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de carritos. Incluye enlaces HATEOAS en _links"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de carritos en formato HAL (_embedded.carritoList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoCollectionDoc.class),
+                            examples = @ExampleObject(name = "carritosHal", value = HalExamples.CARRITO_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
@@ -75,7 +90,13 @@ public class CarritoController {
             summary = "Obtener carrito por ID",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Carrito encontrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Carrito encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoResourceDoc.class),
+                            examples = @ExampleObject(name = "carritoHal", value = HalExamples.CARRITO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Carrito no encontrado"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
@@ -142,7 +163,13 @@ public class CarritoController {
                     STAFF puede indicar `usuario.id` para operar carritos ajenos.
                     Si se omite `usuario`, se usa el del token.""")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Carrito actualizado. Incluye enlaces HATEOAS en _links"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Carrito actualizado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoResourceDoc.class),
+                            examples = @ExampleObject(name = "carritoHal", value = HalExamples.CARRITO_RESOURCE))),
             @ApiResponse(responseCode = "403", description = "CLIENTE intentando carrito ajeno"),
             @ApiResponse(responseCode = "422", description = "Stock insuficiente"),
             @ApiResponse(responseCode = "401", description = "No autenticado")

@@ -3,6 +3,9 @@ package com.minimarket.controller;
 import com.minimarket.dto.ConfirmarPagoResponse;
 import com.minimarket.entity.Venta;
 import com.minimarket.hateoas.VentaModelAssembler;
+import com.minimarket.openapi.HalExamples;
+import com.minimarket.openapi.VentaCollectionDoc;
+import com.minimarket.openapi.VentaResourceDoc;
 import com.minimarket.service.VentaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +37,13 @@ public class VentaController {
             summary = "Listar ventas",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de ventas"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de ventas en formato HAL (_embedded.ventaList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaCollectionDoc.class),
+                            examples = @ExampleObject(name = "ventasHal", value = HalExamples.VENTA_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
@@ -47,7 +56,13 @@ public class VentaController {
             summary = "Listar ventas pendientes de pago",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ventas con estado PENDIENTE_PAGO"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Ventas pendientes en formato HAL (_embedded.ventaList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaCollectionDoc.class),
+                            examples = @ExampleObject(name = "ventasHal", value = HalExamples.VENTA_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
@@ -60,7 +75,13 @@ public class VentaController {
             summary = "Obtener venta por ID",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Venta encontrada"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Venta encontrada en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaResourceDoc.class),
+                            examples = @ExampleObject(name = "ventaHal", value = HalExamples.VENTA_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Venta no encontrada"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
@@ -77,7 +98,13 @@ public class VentaController {
             summary = "Crear venta",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Venta creada"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Venta creada en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaResourceDoc.class),
+                            examples = @ExampleObject(name = "ventaHal", value = HalExamples.VENTA_RESOURCE))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })

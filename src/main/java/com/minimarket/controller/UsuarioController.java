@@ -3,6 +3,9 @@ package com.minimarket.controller;
 import com.minimarket.dto.UsuarioRequestDto;
 import com.minimarket.dto.UsuarioResponseDto;
 import com.minimarket.hateoas.UsuarioModelAssembler;
+import com.minimarket.openapi.HalExamples;
+import com.minimarket.openapi.UsuarioCollectionDoc;
+import com.minimarket.openapi.UsuarioResourceDoc;
 import com.minimarket.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,7 +39,13 @@ public class UsuarioController {
             summary = "Listar usuarios",
             description = "Rol: ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de usuarios"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de usuarios en formato HAL (_embedded.usuarioResponseDtoList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UsuarioCollectionDoc.class),
+                            examples = @ExampleObject(name = "usuariosHal", value = HalExamples.USUARIO_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
@@ -49,7 +58,13 @@ public class UsuarioController {
             summary = "Obtener usuario por ID",
             description = "Rol: ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuario encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UsuarioResourceDoc.class),
+                            examples = @ExampleObject(name = "usuarioHal", value = HalExamples.USUARIO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
@@ -66,7 +81,13 @@ public class UsuarioController {
             summary = "Crear usuario",
             description = "Rol: ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuario creado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuario creado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UsuarioResourceDoc.class),
+                            examples = @ExampleObject(name = "usuarioHal", value = HalExamples.USUARIO_RESOURCE))),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
@@ -88,7 +109,13 @@ public class UsuarioController {
             summary = "Actualizar usuario",
             description = "Rol: ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuario actualizado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuario actualizado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UsuarioResourceDoc.class),
+                            examples = @ExampleObject(name = "usuarioHal", value = HalExamples.USUARIO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
