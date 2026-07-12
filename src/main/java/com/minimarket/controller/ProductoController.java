@@ -2,6 +2,10 @@ package com.minimarket.controller;
 
 import com.minimarket.dto.StockDisponibleResponse;
 import com.minimarket.entity.Producto;
+import com.minimarket.hateoas.ProductoModelAssembler;
+import com.minimarket.openapi.HalExamples;
+import com.minimarket.openapi.ProductoCollectionDoc;
+import com.minimarket.openapi.ProductoResourceDoc;
 import com.minimarket.service.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,11 +16,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+import java.util.Objects;
 @Tag(name = "Productos", description = "Catálogo de productos")
 @RestController
 @RequestMapping("/api/productos")
@@ -25,15 +30,24 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
+    @Autowired
+    private ProductoModelAssembler productoModelAssembler;
+
     @Operation(
             summary = "Listar productos",
             description = "Público. Incluye stockDisponible calculado desde inventario.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de productos")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de productos en formato HAL (_embedded.productoList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoCollectionDoc.class),
+                            examples = @ExampleObject(name = "productosHal", value = HalExamples.PRODUCTO_COLLECTION)))
     })
     @GetMapping
-    public List<Producto> listarProductos() {
-        return productoService.findAll();
+    public CollectionModel<EntityModel<Producto>> listarProductos() {
+        return productoModelAssembler.toCollectionModel(productoService.findAll());
     }
 
     @Operation(
@@ -58,26 +72,40 @@ public class ProductoController {
             summary = "Obtener producto por ID",
             description = "Público. Incluye stockDisponible calculado desde inventario.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Producto encontrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Producto encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoResourceDoc.class),
+                            examples = @ExampleObject(name = "productoHal", value = HalExamples.PRODUCTO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Producto no encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Producto> obtenerProductoPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Producto>> obtenerProductoPorId(@PathVariable Long id) {
         Producto producto = productoService.findById(id);
-        return (producto != null) ? ResponseEntity.ok(producto) : ResponseEntity.notFound().build();
+        return (producto != null)
+                ? ResponseEntity.ok(productoModelAssembler.toModel(producto))
+                : ResponseEntity.notFound().build();
     }
 
     @Operation(
             summary = "Crear producto",
             description = "Roles: GERENTE, ADMIN. El stock se gestiona vía inventario (POST /api/inventario).")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Producto creado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Producto creado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoResourceDoc.class),
+                            examples = @ExampleObject(name = "productoHal", value = HalExamples.PRODUCTO_RESOURCE))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
-    public Producto guardarProducto(
+    public EntityModel<Producto> guardarProducto(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(examples = @ExampleObject(
                             name = "Nuevo producto",
@@ -86,21 +114,27 @@ public class ProductoController {
                                     "categoria":{"id":1}}\
                                     """)))
             @RequestBody Producto producto) {
-        return productoService.save(producto);
+        return productoModelAssembler.toModel(Objects.requireNonNull(productoService.save(producto)));
     }
 
     @Operation(
             summary = "Actualizar producto",
             description = "Roles: GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Producto actualizado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Producto actualizado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProductoResourceDoc.class),
+                            examples = @ExampleObject(name = "productoHal", value = HalExamples.PRODUCTO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
-    public ResponseEntity<Producto> actualizarProducto(
+    public ResponseEntity<EntityModel<Producto>> actualizarProducto(
             @PathVariable Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(schema = @Schema(implementation = Producto.class)))
@@ -108,7 +142,8 @@ public class ProductoController {
         Producto productoExistente = productoService.findById(id);
         if (productoExistente != null) {
             producto.setId(id);
-            return ResponseEntity.ok(productoService.save(producto));
+            Producto productoActualizado = Objects.requireNonNull(productoService.save(producto));
+            return ResponseEntity.ok(productoModelAssembler.toModel(productoActualizado));
         }
         return ResponseEntity.notFound().build();
     }

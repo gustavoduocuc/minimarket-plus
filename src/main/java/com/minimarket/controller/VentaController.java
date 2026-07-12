@@ -2,6 +2,10 @@ package com.minimarket.controller;
 
 import com.minimarket.dto.ConfirmarPagoResponse;
 import com.minimarket.entity.Venta;
+import com.minimarket.hateoas.VentaModelAssembler;
+import com.minimarket.openapi.HalExamples;
+import com.minimarket.openapi.VentaCollectionDoc;
+import com.minimarket.openapi.VentaResourceDoc;
 import com.minimarket.service.VentaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,10 +16,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Ventas", description = "Gestión de ventas y confirmación de pagos")
 @SecurityRequirement(name = "bearerAuth")
@@ -26,63 +30,92 @@ public class VentaController {
     @Autowired
     private VentaService ventaService;
 
+    @Autowired
+    private VentaModelAssembler ventaModelAssembler;
+
     @Operation(
             summary = "Listar ventas",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de ventas"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de ventas en formato HAL (_embedded.ventaList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaCollectionDoc.class),
+                            examples = @ExampleObject(name = "ventasHal", value = HalExamples.VENTA_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping
-    public List<Venta> listarVentas() {
-        return ventaService.findAll();
+    public CollectionModel<EntityModel<Venta>> listarVentas() {
+        return ventaModelAssembler.toCollectionModel(ventaService.findAll());
     }
 
     @Operation(
             summary = "Listar ventas pendientes de pago",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ventas con estado PENDIENTE_PAGO"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Ventas pendientes en formato HAL (_embedded.ventaList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaCollectionDoc.class),
+                            examples = @ExampleObject(name = "ventasHal", value = HalExamples.VENTA_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping("/pendientes")
-    public List<Venta> listarVentasPendientes() {
-        return ventaService.findPendientesDePago();
+    public CollectionModel<EntityModel<Venta>> listarVentasPendientes() {
+        return ventaModelAssembler.toPendientesCollectionModel(ventaService.findPendientesDePago());
     }
 
     @Operation(
             summary = "Obtener venta por ID",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Venta encontrada"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Venta encontrada en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaResourceDoc.class),
+                            examples = @ExampleObject(name = "ventaHal", value = HalExamples.VENTA_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Venta no encontrada"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Venta> obtenerVentaPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Venta>> obtenerVentaPorId(@PathVariable Long id) {
         Venta venta = ventaService.findById(id);
-        return (venta != null) ? ResponseEntity.ok(venta) : ResponseEntity.notFound().build();
+        return (venta != null)
+                ? ResponseEntity.ok(ventaModelAssembler.toModel(venta))
+                : ResponseEntity.notFound().build();
     }
 
     @Operation(
             summary = "Crear venta",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Venta creada"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Venta creada en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = VentaResourceDoc.class),
+                            examples = @ExampleObject(name = "ventaHal", value = HalExamples.VENTA_RESOURCE))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @PostMapping
-    public Venta guardarVenta(
+    public EntityModel<Venta> guardarVenta(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(examples = @ExampleObject(
                             name = "Nueva venta",
                             value = "{\"metodoPago\":\"EFECTIVO\",\"estadoPago\":\"PENDIENTE_PAGO\"}")))
             @RequestBody Venta venta) {
-        return ventaService.save(venta);
+        return ventaModelAssembler.toModel(ventaService.save(venta));
     }
 
     @Operation(

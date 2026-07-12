@@ -5,6 +5,10 @@ import com.minimarket.dto.CheckoutRequest;
 import com.minimarket.dto.CheckoutResponse;
 import com.minimarket.entity.Carrito;
 import com.minimarket.entity.Venta;
+import com.minimarket.hateoas.CarritoModelAssembler;
+import com.minimarket.openapi.CarritoCollectionDoc;
+import com.minimarket.openapi.CarritoResourceDoc;
+import com.minimarket.openapi.HalExamples;
 import com.minimarket.service.CarritoCheckoutService;
 import com.minimarket.service.CarritoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,12 +19,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Carrito", description = "Gestión del carrito de compras y checkout")
 @SecurityRequirement(name = "bearerAuth")
@@ -30,25 +34,35 @@ public class CarritoController {
 
     private final CarritoService carritoService;
     private final CarritoCheckoutService carritoCheckoutService;
+    private final CarritoModelAssembler carritoModelAssembler;
 
-    public CarritoController(CarritoService carritoService, CarritoCheckoutService carritoCheckoutService) {
+    public CarritoController(CarritoService carritoService, CarritoCheckoutService carritoCheckoutService,
+                             CarritoModelAssembler carritoModelAssembler) {
         this.carritoService = carritoService;
         this.carritoCheckoutService = carritoCheckoutService;
+        this.carritoModelAssembler = carritoModelAssembler;
     }
 
     @Operation(
             summary = "Obtener carrito propio",
             description = "Roles: CLIENTE, ADMIN. Devuelve el carrito del usuario autenticado.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Carrito encontrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Carrito encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoResourceDoc.class),
+                            examples = @ExampleObject(name = "carritoHal", value = HalExamples.CARRITO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Carrito no existe"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping
-    public ResponseEntity<Carrito> obtenerCarritoPropio() {
+    public ResponseEntity<EntityModel<Carrito>> obtenerCarritoPropio() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return carritoService.obtenerCarritoDe(username)
+                .map(carritoModelAssembler::toModelPropio)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -57,27 +71,40 @@ public class CarritoController {
             summary = "Listar todos los carritos",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de carritos"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de carritos en formato HAL (_embedded.carritoList + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoCollectionDoc.class),
+                            examples = @ExampleObject(name = "carritosHal", value = HalExamples.CARRITO_COLLECTION))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping("/todos")
-    public List<Carrito> listarTodosLosCarritos() {
-        return carritoService.findAll();
+    public CollectionModel<EntityModel<Carrito>> listarTodosLosCarritos() {
+        return carritoModelAssembler.toCollectionModel(carritoService.findAll());
     }
 
     @Operation(
             summary = "Obtener carrito por ID",
             description = "Roles: EMPLEADO, GERENTE, ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Carrito encontrado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Carrito encontrado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoResourceDoc.class),
+                            examples = @ExampleObject(name = "carritoHal", value = HalExamples.CARRITO_RESOURCE))),
             @ApiResponse(responseCode = "404", description = "Carrito no encontrado"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Carrito> obtenerCarritoPorId(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Carrito>> obtenerCarritoPorId(@PathVariable Long id) {
         return carritoService.findById(id)
+                .map(carritoModelAssembler::toModelPorId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -136,13 +163,19 @@ public class CarritoController {
                     STAFF puede indicar `usuario.id` para operar carritos ajenos.
                     Si se omite `usuario`, se usa el del token.""")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Carrito actualizado"),
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Carrito actualizado en formato HAL (campos + _links)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CarritoResourceDoc.class),
+                            examples = @ExampleObject(name = "carritoHal", value = HalExamples.CARRITO_RESOURCE))),
             @ApiResponse(responseCode = "403", description = "CLIENTE intentando carrito ajeno"),
             @ApiResponse(responseCode = "422", description = "Stock insuficiente"),
             @ApiResponse(responseCode = "401", description = "No autenticado")
     })
     @PostMapping
-    public Carrito agregarProductoAlCarrito(
+    public EntityModel<Carrito> agregarProductoAlCarrito(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(examples = {
                             @ExampleObject(
@@ -155,11 +188,11 @@ public class CarritoController {
             @RequestBody AgregarItemCarritoRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Long usuarioObjetivoId = request.getUsuario() != null ? request.getUsuario().getId() : null;
-        return carritoService.agregarProducto(
+        return carritoModelAssembler.toModelPropio(carritoService.agregarProducto(
                 username,
                 usuarioObjetivoId,
                 request.getProducto().getId(),
-                request.getCantidad());
+                request.getCantidad()));
     }
 
     @Operation(
