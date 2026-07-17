@@ -1,0 +1,1363 @@
+{
+  "info": {
+    "_postman_id": "3301db13-5f3f-4bb8-aa20-daa3d536b56a",
+    "name": "MiniMarket Plus API",
+    "description": "Colección de la API REST de MiniMarket Plus (multi-módulo).\n\n## Servicios\n| Variable | Servicio | Puerto | Endpoints |\n|----------|----------|--------|-----------|\n| `{{auth_base_url}}` | auth-service | 8081 | `/api/auth/**`, `/api/usuarios/**` |\n| `{{base_url}}` | minimarket-app | 8080 | productos, categorías, carrito, inventario, ventas, notificaciones, etc. |\n\n## Cómo probar\n1. Levantar ambos servicios (`auth-service` y `minimarket-app`).\n2. Ejecutar un **Login** (guarda `token` automáticamente).\n3. Usar el resto de requests; el Bearer Token de la colección usa `{{token}}`.\n\n## Usuarios de prueba\n| Usuario | Contraseña | Rol |\n|---------|------------|-----|\n| admin | Admin123! | ADMIN |\n| gerente | Gerente123! | GERENTE |\n| empleado | Empleado123! | EMPLEADO |\n| cliente | Cliente123! | CLIENTE |\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "6766925"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_base_url}}/api/auth/login",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (gerente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"gerente\",\n  \"password\": \"Gerente123!\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_base_url}}/api/auth/login",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (empleado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"empleado\",\n  \"password\": \"Empleado123!\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_base_url}}/api/auth/login",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (cliente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"cliente\",\n  \"password\": \"Cliente123!\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_base_url}}/api/auth/login",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registro",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevoUsuario\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_base_url}}/api/auth/registro",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registro"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de autenticación (públicos).\n\nServicio: **auth-service** (`{{auth_base_url}}` → http://localhost:8081)."
+    },
+    {
+      "name": "Público",
+      "item": [
+        {
+          "name": "Hola Mundo (minimarket-app)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/public/hola",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "hola"
+              ]
+            },
+            "description": "Health-check público en minimarket-app (:8080)."
+          },
+          "response": []
+        },
+        {
+          "name": "Hola Mundo (auth-service)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_base_url}}/public/hola",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "public",
+                "hola"
+              ]
+            },
+            "response": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Health-check público en auth-service (:8081)."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints públicos sin autenticación.\n\n`/public/hola` existe en ambos servicios. Esta request usa `minimarket-app` (`{{base_url}}`)."
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/productos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener producto por ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/productos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar stock disponible",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/productos/1/stock",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "1",
+                "stock"
+              ]
+            },
+            "description": "Público. Devuelve el stock calculado desde los movimientos de inventario (Entrada - Salida). 404 si el producto no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Galletas 200g\",\n  \"precio\": 950.0,\n  \"categoria\": { \"id\": 1 }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/productos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "productos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Galletas 200g (actualizado)\",\n  \"precio\": 1000.0,\n  \"categoria\": { \"id\": 1 }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/productos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/productos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "productos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "GET público. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+    },
+    {
+      "name": "Categorías",
+      "item": [
+        {
+          "name": "Listar categorías",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categorias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "categorias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener categoría por ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categorias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "categorias",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Snacks\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categorias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "categorias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Snacks y dulces\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/categorias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "categorias",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categorias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "categorias",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "GET público. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+    },
+    {
+      "name": "Carrito",
+      "item": [
+        {
+          "name": "Obtener carrito propio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/carrito",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito"
+              ]
+            },
+            "description": "Devuelve el carrito del usuario autenticado (CLIENTE o ADMIN). Respuesta: objeto con `items: [{ producto, cantidad }]`. 404 si no tiene carrito."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar todos los carritos (staff)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/carrito/todos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito",
+                "todos"
+              ]
+            },
+            "description": "Lista todos los carritos activos. Requiere EMPLEADO, GERENTE o ADMIN."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener carrito por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/carrito/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito",
+                "1"
+              ]
+            },
+            "description": "Consulta un carrito especifico por su ID. Requiere EMPLEADO, GERENTE o ADMIN."
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar producto al carrito",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": { \"id\": 4 },\n  \"producto\": { \"id\": 1 },\n  \"cantidad\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/carrito",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito"
+              ]
+            },
+            "description": "Agrega o suma cantidad al carrito. `usuario.id` opcional: CLIENTE solo puede usar su propio id (403 si apunta a otro); STAFF puede usar cualquier id. Si se omite, usa el usuario del token."
+          },
+          "response": []
+        },
+        {
+          "name": "Checkout carrito de tercero (staff)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metodoPago\": \"EFECTIVO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/carrito/checkout/4",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito",
+                "checkout",
+                "4"
+              ]
+            },
+            "description": "Concreta la venta del carrito de un tercero. Requiere EMPLEADO, GERENTE o ADMIN. Reemplazar `4` por el usuarioId del cliente."
+          },
+          "response": []
+        },
+        {
+          "name": "Checkout del carrito",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metodoPago\": \"EFECTIVO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/carrito/checkout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito",
+                "checkout"
+              ]
+            },
+            "description": "Confirma la compra del carrito del usuario autenticado. `metodoPago` admite EFECTIVO, DEBITO o CREDITO."
+          },
+          "response": []
+        },
+        {
+          "name": "Quitar producto del carrito",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/carrito/items/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito",
+                "items",
+                "1"
+              ]
+            },
+            "description": "Elimina un producto del carrito del usuario autenticado por productoId."
+          },
+          "response": []
+        },
+        {
+          "name": "Vaciar carrito",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/carrito",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "carrito"
+              ]
+            },
+            "description": "Elimina todos los items del carrito del usuario autenticado."
+          },
+          "response": []
+        }
+      ],
+      "description": "Carrito unificado por usuario. POST/DELETE propio requiere CLIENTE o ADMIN. GET /todos y GET /{id} requieren EMPLEADO, GERENTE o ADMIN. Checkout requiere autenticacion.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+    },
+    {
+      "name": "Inventario",
+      "item": [
+        {
+          "name": "Listar inventario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/inventario",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inventario"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener movimiento por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/inventario/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inventario",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar movimiento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"producto\": { \"id\": 1 },\n  \"cantidad\": 10,\n  \"tipoMovimiento\": \"Entrada\",\n  \"fechaMovimiento\": \"2026-06-27T12:00:00.000+00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inventario",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inventario"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar movimiento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"producto\": { \"id\": 1 },\n  \"cantidad\": 15,\n  \"tipoMovimiento\": \"Entrada\",\n  \"fechaMovimiento\": \"2026-06-27T12:00:00.000+00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/inventario/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inventario",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar movimiento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/inventario/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "inventario",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "GET requiere EMPLEADO, GERENTE o ADMIN. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+    },
+    {
+      "name": "Ventas",
+      "item": [
+        {
+          "name": "Listar ventas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/ventas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ventas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar ventas pendientes de pago",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/ventas/pendientes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "pendientes"
+              ]
+            },
+            "description": "Lista las ventas en estado PENDIENTE_PAGO. Útil para obtener los ids que luego se confirman con POST /api/ventas/{id}/confirmar-pago."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener venta por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/ventas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar venta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": { \"id\": 3 },\n  \"fecha\": \"2026-06-27T10:36:00.000Z\",\n  \"metodoPago\": \"EFECTIVO\",\n  \"estadoPago\": \"PAGADO\",\n  \"detalles\": [\n    {\n      \"producto\": { \"id\": 1 },\n      \"cantidad\": 2,\n      \"precio\": 1200.0\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ventas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ventas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Confirmar pago de venta",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/ventas/1/confirmar-pago",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "1",
+                "confirmar-pago"
+              ]
+            },
+            "description": "Confirma el pago de una venta pendiente y cambia su estado a PAGADO."
+          },
+          "response": []
+        }
+      ],
+      "description": "Requiere EMPLEADO, GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+    },
+    {
+      "name": "Detalle Ventas",
+      "item": [
+        {
+          "name": "Listar detalle ventas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/detalle-ventas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "detalle-ventas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener detalle por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/detalle-ventas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "detalle-ventas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear detalle venta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venta\": { \"id\": 1 },\n  \"producto\": { \"id\": 1 },\n  \"cantidad\": 2,\n  \"precioUnitario\": 1200.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/detalle-ventas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "detalle-ventas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar detalle venta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"venta\": { \"id\": 1 },\n  \"producto\": { \"id\": 1 },\n  \"cantidad\": 3,\n  \"precioUnitario\": 1200.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/detalle-ventas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "detalle-ventas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar detalle venta",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/detalle-ventas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "detalle-ventas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Requiere EMPLEADO, GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_base_url}}/api/usuarios",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_base_url}}/api/usuarios/1",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevoAdmin\",\n  \"password\": \"NuevoAdmin123!\",\n  \"roles\": [\"EMPLEADO\"]\n}"
+            },
+            "url": {
+              "raw": "{{auth_base_url}}/api/usuarios",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"empleadoActualizado\",\n  \"password\": \"NuevaPass123!\",\n  \"roles\": [\"EMPLEADO\"]\n}"
+            },
+            "url": {
+              "raw": "{{auth_base_url}}/api/usuarios/3",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{auth_base_url}}/api/usuarios/3",
+              "host": [
+                "{{auth_base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Solo ADMIN.\n\nServicio: **auth-service** (`{{auth_base_url}}` → http://localhost:8081)."
+    },
+    {
+      "name": "Notificaciones",
+      "description": "Servicio: **minimarket-app** (`{{base_url}}`). Promociones requieren GERENTE/ADMIN.",
+      "item": [
+        {
+          "name": "Listar mis notificaciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notificaciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notificaciones"
+              ]
+            },
+            "response": [],
+            "description": "Autenticado. Lista notificaciones del usuario del JWT."
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar notificación como leída",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notificaciones/1/leida",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notificaciones",
+                "1",
+                "leida"
+              ]
+            },
+            "response": [],
+            "description": "Autenticado. Marca la notificación propia como leída."
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar promoción a un usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notificaciones/promociones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notificaciones",
+                "promociones"
+              ]
+            },
+            "response": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinatarioId\": 4,\n  \"mensaje\": \"2x1 en bebidas este fin de semana\"\n}"
+            },
+            "description": "GERENTE/ADMIN. Si omites destinatarioId, envía a todos (según implementación)."
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar promoción a todos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notificaciones/promociones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notificaciones",
+                "promociones"
+              ]
+            },
+            "response": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mensaje\": \"Oferta especial en lácteos\"\n}"
+            },
+            "description": "GERENTE/ADMIN. Broadcast de promoción."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Análisis de ventas",
+      "description": "Servicio: **minimarket-app** (`{{base_url}}`). Requiere rol de staff (EMPLEADO/GERENTE/ADMIN).",
+      "item": [
+        {
+          "name": "Productos más vendidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/ventas/analisis/productos-mas-vendidos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ventas",
+                "analisis",
+                "productos-mas-vendidos"
+              ]
+            },
+            "response": [],
+            "description": "Reporte de rotación: productos más vendidos."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "auth_base_url",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}

@@ -1,95 +1,97 @@
 # MINIMARKET PLUS
 
-Backend REST para la gestión de un minimarket, desarrollado con Spring Boot 3 y Spring Security (Arquitectura Stateless con JWT).
+Backend REST multi-módulo para la gestión de un minimarket, desarrollado con Spring Boot 3 y Spring Security (arquitectura stateless con JWT).
+
+| Módulo | Puerto | Responsabilidad |
+|--------|--------|-----------------|
+| `auth-service` | 8081 | Login, registro, usuarios, emisión JWT |
+| `minimarket-app` | 8080 | Catálogo, inventario, ventas y notificaciones (valida JWT) |
 
 ## Requisitos
-* Java 17
+
+* Java 17+
 * Maven (incluido via `./mvnw`)
 
 ## Ejecución local
+
+Terminal 1 — autenticación:
 ```bash
-mvn spring-boot:run
+./mvnw -pl auth-service spring-boot:run
 ```
-La aplicación queda disponible en http://localhost:8080.
 
-## Autenticación y pruebas (JWT)
+Terminal 2 — aplicación de negocio:
+```bash
+./mvnw -pl minimarket-app spring-boot:run
+```
 
-La API utiliza JSON Web Tokens (JWT). Para acceder a rutas protegidas, debes enviar el token en la cabecera HTTP `Authorization: Bearer <token>`.
+Ambos usan el mismo `JWT_SECRET` (valor por defecto en cada `application.properties`).
 
-**Obtener token (login):**
+### OpenAPI / Swagger
+
+* Auth: http://localhost:8081/swagger-ui.html
+* App: http://localhost:8080/swagger-ui.html
+
+## Autenticación rápida (JWT)
+
+Para rutas protegidas de `minimarket-app`, enviar `Authorization: Bearer <token>`.
+
+**Login (`auth-service`):**
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin", "password":"Admin123!"}'
 ```
 
-**Registrar nuevo usuario:**
+**Registro (`auth-service`):**
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/registro \
+curl -X POST http://localhost:8081/api/auth/registro \
   -H "Content-Type: application/json" \
   -d '{"username":"nuevo", "password":"Password123!"}'
 ```
 
-**Consumir endpoint protegido:**
+**Endpoint protegido (`minimarket-app`):**
 
 ```bash
 curl -X GET http://localhost:8080/api/ventas \
   -H "Authorization: Bearer <TU_TOKEN_AQUI>"
 ```
 
-### Política de contraseñas
+## Seguridad, acceso y datos
 
-Las contraseñas en registro y alta de usuarios deben cumplir:
+Política de contraseñas, protección del login, bases H2, usuarios de prueba y matriz de roles/permisos:
 
-* Mínimo 8 caracteres
-* Al menos una mayúscula, una minúscula, un número y un carácter especial (`!@#$%^&*`, etc.)
+→ [docs/seguridad-acceso-y-datos.md](docs/seguridad-acceso-y-datos.md)
 
-### Protección del login (entorno local)
+## Colección Postman
 
-* Bloqueo temporal tras intentos fallidos (en memoria; se reinicia al reiniciar la aplicación)
-* Rate limiting por IP en `POST /api/auth/login`
+Importar en Postman:
 
-Propiedades configurables en `application.properties` bajo `security.login.*`.
+[`docs/MiniMarket Plus API.postman_collection.json`](docs/MiniMarket%20Plus%20API.postman_collection.json)
 
-## Base de datos (entorno local)
+Variables de la colección:
 
-* Consola H2: http://localhost:8080/h2-console
-* JDBC URL: `jdbc:h2:mem:minimarketdb`
-* Usuario: `sa`
-* Contraseña: (vacía)
-
-## Usuarios de prueba
-
-| Usuario   | Contraseña     | Rol      |
-|-----------|----------------|----------|
-| admin     | Admin123!      | ADMIN    |
-| gerente   | Gerente123!    | GERENTE  |
-| empleado  | Empleado123!   | EMPLEADO |
-| cliente   | Cliente123!    | CLIENTE  |
-
-## Roles y permisos
-
-| Recurso | Público | CLIENTE | EMPLEADO | GERENTE | ADMIN |
-|---------|---------|---------|----------|---------|-------|
-| GET productos / categorías | Si | Si | Si | Si | Si |
-| POST/PUT/DELETE productos | — | — | — | Si | Si |
-| POST/PUT/DELETE categorías | — | — | — | Si | Si |
-| Carrito | — | Si | — | — | Si |
-| GET inventario | — | — | Si | Si | Si |
-| POST/PUT/DELETE inventario | — | — | — | Si | Si |
-| Ventas / detalle ventas | — | — | Si | Si | Si |
-| Usuarios | — | — | — | — | Si |
-| /public/** | Si | Si | Si | Si | Si |
+| Variable | Valor por defecto | Uso |
+|----------|-------------------|-----|
+| `auth_base_url` | `http://localhost:8081` | Login, registro, usuarios |
+| `base_url` | `http://localhost:8080` | Catálogo, carrito, inventario, ventas, etc. |
+| `token` | (se llena al hacer Login) | Bearer Token de la colección |
 
 ## Tests
 
 ```bash
-cd minimarket
-mvn clean test
+./mvnw clean test
 ```
 
-## Reporte de Cobertura (JaCoCo)
+## Cobertura
 
 Visita [docs/coverage.md](docs/coverage.md) para ver más detalle.
+
+Reporte agregado (ambos servicios):
+
+```bash
+./mvnw clean verify
+```
+
+Abrir: `coverage-report/target/site/jacoco-aggregate/index.html`
