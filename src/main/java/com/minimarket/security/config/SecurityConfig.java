@@ -53,11 +53,12 @@ public class SecurityConfig {
                 .accessDeniedHandler(securityAuditHandler)
             )
             .headers(headers -> headers
-                .frameOptions(frame -> frame.deny())
+                .frameOptions(frame -> frame.sameOrigin()) 
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**").permitAll()
