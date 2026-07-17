@@ -19,7 +19,8 @@
 
 	<modules>
 		<module>auth-service</module>
-		<module>minimarket-app</module>
+		<module>catalogo-inventario-service</module>
+		<module>ventas-service</module>
 		<module>coverage-report</module>
 	</modules>
 

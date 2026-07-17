@@ -1,5 +1,6 @@
 package com.minimarket.controller;
 
+import com.minimarket.client.VentasUsuarioClient;
 import com.minimarket.security.model.AuthResponse;
 import com.minimarket.security.model.LoginRequest;
 import com.minimarket.security.model.RegistroRequest;
@@ -39,18 +40,21 @@ public class AuthController {
     private final JwtTokenService jwtTokenService;
     private final UsuarioService usuarioService;
     private final LoginAttemptService loginAttemptService;
+    private final VentasUsuarioClient ventasUsuarioClient;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             UserDetailsService userDetailsService,
             JwtTokenService jwtTokenService,
             UsuarioService usuarioService,
-            LoginAttemptService loginAttemptService) {
+            LoginAttemptService loginAttemptService,
+            VentasUsuarioClient ventasUsuarioClient) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtTokenService = jwtTokenService;
         this.usuarioService = usuarioService;
         this.loginAttemptService = loginAttemptService;
+        this.ventasUsuarioClient = ventasUsuarioClient;
     }
 
     @Operation(
@@ -108,6 +112,7 @@ public class AuthController {
         nuevoUsuario.setPassword(registroRequest.getPassword());
 
         usuarioService.save(nuevoUsuario);
+        ventasUsuarioClient.ensureUsuario(nuevoUsuario.getUsername());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("mensaje", "Usuario registrado con éxito"));

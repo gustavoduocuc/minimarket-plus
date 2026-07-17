@@ -5,7 +5,10 @@ Backend REST multi-módulo para la gestión de un minimarket, desarrollado con S
 | Módulo | Puerto | Responsabilidad |
 |--------|--------|-----------------|
 | `auth-service` | 8081 | Login, registro, usuarios, emisión JWT |
-| `minimarket-app` | 8080 | Catálogo, inventario, ventas y notificaciones (valida JWT) |
+| `catalogo-inventario-service` | 8082 | Productos, categorías, inventario (stock) |
+| `ventas-service` | 8080 | Ventas, carrito, notificaciones (valida JWT; consume catálogo vía RestClient) |
+
+Sin API Gateway: el cliente apunta a cada puerto.
 
 ## Requisitos
 
@@ -19,43 +22,67 @@ Terminal 1 — autenticación:
 ./mvnw -pl auth-service spring-boot:run
 ```
 
-Terminal 2 — aplicación de negocio:
+Terminal 2 — catálogo e inventario:
 ```bash
-./mvnw -pl minimarket-app spring-boot:run
+./mvnw -pl catalogo-inventario-service spring-boot:run
 ```
 
-Ambos usan el mismo `JWT_SECRET` (valor por defecto en cada `application.properties`).
+Terminal 3 — ventas:
+```bash
+./mvnw -pl ventas-service spring-boot:run
+```
+
+Los tres usan el mismo `JWT_SECRET` (valor por defecto en cada `application.properties`).
+`ventas-service` apunta a catálogo con `catalogo.base-url` (por defecto `http://localhost:8082`).
+Auth sincroniza proyecciones de usuario hacia ventas con `ventas.base-url` y `ventas.internal-token` (mismo token en ambos; env `VENTAS_INTERNAL_TOKEN` en prod).
 
 ### OpenAPI / Swagger
 
 * Auth: http://localhost:8081/swagger-ui.html
-* App: http://localhost:8080/swagger-ui.html
+* Catálogo: http://localhost:8082/swagger-ui.html
+* Ventas: http://localhost:8080/swagger-ui.html
 
-## Autenticación rápida (JWT)
+## Flujo E2E (curl)
 
-Para rutas protegidas de `minimarket-app`, enviar `Authorization: Bearer <token>`.
-
-**Login (`auth-service`):**
+**1. Login (`auth-service`):**
 
 ```bash
 curl -X POST http://localhost:8081/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin", "password":"Admin123!"}'
+  -d '{"username":"cliente", "password":"Cliente123!"}'
 ```
 
-**Registro (`auth-service`):**
+Guarda el `token` de la respuesta.
+
+**2. Listar productos (`catalogo-inventario-service`):**
 
 ```bash
-curl -X POST http://localhost:8081/api/auth/registro \
+curl -X GET http://localhost:8082/api/productos
+```
+
+**3. Agregar al carrito (`ventas-service`):**
+
+```bash
+curl -X POST http://localhost:8080/api/carrito \
+  -H "Authorization: Bearer <TOKEN>" \
   -H "Content-Type: application/json" \
-  -d '{"username":"nuevo", "password":"Password123!"}'
+  -d '{"producto":{"id":1},"cantidad":1}'
 ```
 
-**Endpoint protegido (`minimarket-app`):**
+**4. Checkout:**
 
 ```bash
-curl -X GET http://localhost:8080/api/ventas \
-  -H "Authorization: Bearer <TU_TOKEN_AQUI>"
+curl -X POST http://localhost:8080/api/carrito/checkout \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"metodoPago":"EFECTIVO"}'
+```
+
+**5. Confirmar pago (staff — login como `empleado`):**
+
+```bash
+curl -X POST http://localhost:8080/api/ventas/<VENTA_ID>/confirmar-pago \
+  -H "Authorization: Bearer <TOKEN_EMPLEADO>"
 ```
 
 ## Seguridad, acceso y datos
@@ -75,7 +102,8 @@ Variables de la colección:
 | Variable | Valor por defecto | Uso |
 |----------|-------------------|-----|
 | `auth_base_url` | `http://localhost:8081` | Login, registro, usuarios |
-| `base_url` | `http://localhost:8080` | Catálogo, carrito, inventario, ventas, etc. |
+| `catalogo_base_url` | `http://localhost:8082` | Productos, categorías, inventario |
+| `base_url` | `http://localhost:8080` | Carrito, ventas, notificaciones |
 | `token` | (se llena al hacer Login) | Bearer Token de la colección |
 
 ## Tests
@@ -88,7 +116,7 @@ Variables de la colección:
 
 Visita [docs/coverage.md](docs/coverage.md) para ver más detalle.
 
-Reporte agregado (ambos servicios):
+Reporte agregado (auth + catálogo + ventas):
 
 ```bash
 ./mvnw clean verify

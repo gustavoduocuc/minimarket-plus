@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.client.VentasUsuarioClient;
 import com.minimarket.dto.UsuarioRequestDto;
 import com.minimarket.dto.UsuarioResponseDto;
 import com.minimarket.hateoas.HateoasTestSupport;
@@ -43,6 +44,9 @@ class UsuarioControllerTest {
 
     @Mock
     private UsuarioModelAssembler usuarioModelAssembler;
+
+    @Mock
+    private VentasUsuarioClient ventasUsuarioClient;
 
     @InjectMocks
     private UsuarioController usuarioController;
@@ -102,6 +106,8 @@ class UsuarioControllerTest {
                         .content(requireNonNull(objectMapper.writeValueAsString(usuarioRequest))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("empleado"));
+
+        verify(ventasUsuarioClient).ensureUsuario("empleado");
     }
 
     @Test

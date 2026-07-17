@@ -12,7 +12,7 @@
 	<artifactId>coverage-report</artifactId>
 	<packaging>pom</packaging>
 	<name>coverage-report</name>
-	<description>Reporte JaCoCo agregado de auth-service y minimarket-app</description>
+	<description>Reporte JaCoCo agregado de todos los microservicios</description>
 
 	<dependencies>
 		<dependency>
@@ -22,7 +22,12 @@
 		</dependency>
 		<dependency>
 			<groupId>com.minimarket</groupId>
-			<artifactId>minimarket-app</artifactId>
+			<artifactId>catalogo-inventario-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.minimarket</groupId>
+			<artifactId>ventas-service</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

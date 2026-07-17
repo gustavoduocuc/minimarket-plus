@@ -1,5 +1,6 @@
 package com.minimarket.controller;
 
+import com.minimarket.client.VentasUsuarioClient;
 import com.minimarket.dto.UsuarioRequestDto;
 import com.minimarket.dto.UsuarioResponseDto;
 import com.minimarket.hateoas.UsuarioModelAssembler;
@@ -34,6 +35,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioModelAssembler usuarioModelAssembler;
+
+    @Autowired
+    private VentasUsuarioClient ventasUsuarioClient;
 
     @Operation(
             summary = "Listar usuarios",
@@ -102,7 +106,9 @@ public class UsuarioController {
                                     "roles":["EMPLEADO"]}\
                                     """)))
             @Valid @RequestBody UsuarioRequestDto usuario) {
-        return usuarioModelAssembler.toModel(Objects.requireNonNull(usuarioService.create(usuario)));
+        UsuarioResponseDto creado = Objects.requireNonNull(usuarioService.create(usuario));
+        ventasUsuarioClient.ensureUsuario(creado.getUsername());
+        return usuarioModelAssembler.toModel(creado);
     }
 
     @Operation(

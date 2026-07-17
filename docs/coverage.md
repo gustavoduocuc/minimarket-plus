@@ -1,6 +1,6 @@
 # Cobertura de código con JaCoCo
 
-Este proyecto usa [JaCoCo](https://www.jacoco.org/jacoco/) para medir la cobertura de tests unitarios e integración en ambos módulos Spring Boot, con un **reporte agregado** único.
+Este proyecto usa [JaCoCo](https://www.jacoco.org/jacoco/) para medir la cobertura de tests unitarios e integración en los módulos Spring Boot (`auth-service`, `catalogo-inventario-service`, `ventas-service`), con un **reporte agregado** único.
 
 ## Comandos
 
@@ -21,7 +21,8 @@ Para un módulo concreto (sin el agregado):
 
 ```bash
 ./mvnw -pl auth-service verify
-./mvnw -pl minimarket-app verify
+./mvnw -pl catalogo-inventario-service verify
+./mvnw -pl ventas-service verify
 ```
 
 Solo el agregado (después de haber corrido tests en los servicios):
@@ -40,7 +41,7 @@ Tras `./mvnw clean verify`, abre el reporte unificado:
 coverage-report/target/site/jacoco-aggregate/index.html
 ```
 
-Incluye la cobertura de `auth-service` y `minimarket-app` en un solo HTML.
+Incluye la cobertura de `auth-service`, `catalogo-inventario-service` y `ventas-service` en un solo HTML.
 
 ### Por módulo
 
@@ -48,7 +49,8 @@ Cada servicio también genera su propio reporte:
 
 ```
 auth-service/target/site/jacoco/index.html
-minimarket-app/target/site/jacoco/index.html
+catalogo-inventario-service/target/site/jacoco/index.html
+ventas-service/target/site/jacoco/index.html
 ```
 
 Los reportes muestran cobertura por paquete, clase y método (instrucciones, ramas y líneas).
@@ -58,8 +60,9 @@ Los reportes muestran cobertura por paquete, clase y método (instrucciones, ram
 El plugin `jacoco-maven-plugin` (v0.8.12) está definido en el parent `pom.xml` (`pluginManagement`) y activado en:
 
 * `auth-service/pom.xml` — `prepare-agent` + `report`
-* `minimarket-app/pom.xml` — `prepare-agent` + `report`
-* `coverage-report/pom.xml` — `report-aggregate` (combina ambos)
+* `catalogo-inventario-service/pom.xml` — `prepare-agent` + `report`
+* `ventas-service/pom.xml` — `prepare-agent` + `report`
+* `coverage-report/pom.xml` — `report-aggregate`
 
 Comportamiento:
 
@@ -74,7 +77,8 @@ Clases de arranque o seed de datos excluidas del reporte de cada módulo:
 | Módulo | Exclusiones |
 |--------|-------------|
 | `auth-service` | `AuthServiceApplication`, `config/AuthDataInitializer` |
-| `minimarket-app` | `MinimarketApplication`, `config/DataInitializer` |
+| `catalogo-inventario-service` | `CatalogoInventarioApplication`, `config/CatalogoDataInitializer` |
+| `ventas-service` | `VentasServiceApplication`, `config/DataInitializer` |
 
 ## Dependencias de test
 

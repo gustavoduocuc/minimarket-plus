@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "3301db13-5f3f-4bb8-aa20-daa3d536b56a",
     "name": "MiniMarket Plus API",
-    "description": "Colección de la API REST de MiniMarket Plus (multi-módulo).\n\n## Servicios\n| Variable | Servicio | Puerto | Endpoints |\n|----------|----------|--------|-----------|\n| `{{auth_base_url}}` | auth-service | 8081 | `/api/auth/**`, `/api/usuarios/**` |\n| `{{base_url}}` | minimarket-app | 8080 | productos, categorías, carrito, inventario, ventas, notificaciones, etc. |\n\n## Cómo probar\n1. Levantar ambos servicios (`auth-service` y `minimarket-app`).\n2. Ejecutar un **Login** (guarda `token` automáticamente).\n3. Usar el resto de requests; el Bearer Token de la colección usa `{{token}}`.\n\n## Usuarios de prueba\n| Usuario | Contraseña | Rol |\n|---------|------------|-----|\n| admin | Admin123! | ADMIN |\n| gerente | Gerente123! | GERENTE |\n| empleado | Empleado123! | EMPLEADO |\n| cliente | Cliente123! | CLIENTE |\n",
+    "description": "Colección de la API REST de MiniMarket Plus (multi-módulo).\n\n## Servicios\n| Variable | Servicio | Puerto | Endpoints |\n|----------|----------|--------|-----------|\n| `{{auth_base_url}}` | auth-service | 8081 | `/api/auth/**`, `/api/usuarios/**` |\n| `{{catalogo_base_url}}` | catalogo-inventario-service | 8082 | productos, categorías, inventario |\n| `{{base_url}}` | ventas-service | 8080 | carrito, ventas, notificaciones |\n\n## Cómo probar\n1. Levantar los tres servicios (`auth-service`, `catalogo-inventario-service`, `ventas-service`).\n2. Ejecutar un **Login** (guarda `token` automáticamente).\n3. Usar el resto de requests; el Bearer Token de la colección usa `{{token}}`.\n\n## Usuarios de prueba\n| Usuario | Contraseña | Rol |\n|---------|------------|-----|\n| admin | Admin123! | ADMIN |\n| gerente | Gerente123! | GERENTE |\n| empleado | Empleado123! | EMPLEADO |\n| cliente | Cliente123! | CLIENTE |\n",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "6766925"
   },
@@ -228,7 +228,7 @@
       "name": "Público",
       "item": [
         {
-          "name": "Hola Mundo (minimarket-app)",
+          "name": "Hola Mundo (ventas-service)",
           "request": {
             "auth": {
               "type": "noauth"
@@ -245,7 +245,7 @@
                 "hola"
               ]
             },
-            "description": "Health-check público en minimarket-app (:8080)."
+            "description": "Health-check público en ventas-service (:8080)."
           },
           "response": []
         },
@@ -273,7 +273,7 @@
           "response": []
         }
       ],
-      "description": "Endpoints públicos sin autenticación.\n\n`/public/hola` existe en ambos servicios. Esta request usa `minimarket-app` (`{{base_url}}`)."
+      "description": "Endpoints públicos sin autenticación.\n\n`/public/hola` existe en ambos servicios. Esta request usa `ventas-service` (`{{base_url}}`)."
     },
     {
       "name": "Productos",
@@ -287,9 +287,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/productos",
+              "raw": "{{catalogo_base_url}}/api/productos",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -308,9 +308,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/productos/1",
+              "raw": "{{catalogo_base_url}}/api/productos/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -330,9 +330,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/productos/1/stock",
+              "raw": "{{catalogo_base_url}}/api/productos/1/stock",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -360,9 +360,9 @@
               "raw": "{\n  \"nombre\": \"Galletas 200g\",\n  \"precio\": 950.0,\n  \"categoria\": { \"id\": 1 }\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/productos",
+              "raw": "{{catalogo_base_url}}/api/productos",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -387,9 +387,9 @@
               "raw": "{\n  \"nombre\": \"Galletas 200g (actualizado)\",\n  \"precio\": 1000.0,\n  \"categoria\": { \"id\": 1 }\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/productos/1",
+              "raw": "{{catalogo_base_url}}/api/productos/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -406,9 +406,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/productos/1",
+              "raw": "{{catalogo_base_url}}/api/productos/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -420,7 +420,7 @@
           "response": []
         }
       ],
-      "description": "GET público. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+      "description": "GET público. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **catalogo-inventario-service** (`{{catalogo_base_url}}` → http://localhost:8082)."
     },
     {
       "name": "Categorías",
@@ -434,9 +434,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/categorias",
+              "raw": "{{catalogo_base_url}}/api/categorias",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -455,9 +455,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/categorias/1",
+              "raw": "{{catalogo_base_url}}/api/categorias/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -483,9 +483,9 @@
               "raw": "{\n  \"nombre\": \"Snacks\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/categorias",
+              "raw": "{{catalogo_base_url}}/api/categorias",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -510,9 +510,9 @@
               "raw": "{\n  \"nombre\": \"Snacks y dulces\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/categorias/1",
+              "raw": "{{catalogo_base_url}}/api/categorias/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -529,9 +529,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/categorias/1",
+              "raw": "{{catalogo_base_url}}/api/categorias/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -543,7 +543,7 @@
           "response": []
         }
       ],
-      "description": "GET público. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+      "description": "GET público. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **catalogo-inventario-service** (`{{catalogo_base_url}}` → http://localhost:8082)."
     },
     {
       "name": "Carrito",
@@ -735,7 +735,7 @@
           "response": []
         }
       ],
-      "description": "Carrito unificado por usuario. POST/DELETE propio requiere CLIENTE o ADMIN. GET /todos y GET /{id} requieren EMPLEADO, GERENTE o ADMIN. Checkout requiere autenticacion.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+      "description": "Carrito unificado por usuario. POST/DELETE propio requiere CLIENTE o ADMIN. GET /todos y GET /{id} requieren EMPLEADO, GERENTE o ADMIN. Checkout requiere autenticacion.\n\nServicio: **ventas-service** (`{{base_url}}` → http://localhost:8080)."
     },
     {
       "name": "Inventario",
@@ -746,9 +746,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/inventario",
+              "raw": "{{catalogo_base_url}}/api/inventario",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -764,9 +764,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/inventario/1",
+              "raw": "{{catalogo_base_url}}/api/inventario/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -792,9 +792,9 @@
               "raw": "{\n  \"producto\": { \"id\": 1 },\n  \"cantidad\": 10,\n  \"tipoMovimiento\": \"Entrada\",\n  \"fechaMovimiento\": \"2026-06-27T12:00:00.000+00:00\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/inventario",
+              "raw": "{{catalogo_base_url}}/api/inventario",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -819,9 +819,9 @@
               "raw": "{\n  \"producto\": { \"id\": 1 },\n  \"cantidad\": 15,\n  \"tipoMovimiento\": \"Entrada\",\n  \"fechaMovimiento\": \"2026-06-27T12:00:00.000+00:00\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/inventario/1",
+              "raw": "{{catalogo_base_url}}/api/inventario/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -838,9 +838,9 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/inventario/1",
+              "raw": "{{catalogo_base_url}}/api/inventario/1",
               "host": [
-                "{{base_url}}"
+                "{{catalogo_base_url}}"
               ],
               "path": [
                 "api",
@@ -850,9 +850,38 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Registrar salida de stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": 1,\n  \"cantidad\": 2\n}"
+            },
+            "url": {
+              "raw": "{{catalogo_base_url}}/api/inventario/salidas",
+              "host": [
+                "{{catalogo_base_url}}"
+              ],
+              "path": [
+                "api",
+                "inventario",
+                "salidas"
+              ]
+            },
+            "description": "Descuenta stock. Roles: EMPLEADO, GERENTE, ADMIN.\n\nServicio: **catalogo-inventario-service** (`{{catalogo_base_url}}` → http://localhost:8082)."
+          },
+          "response": []
         }
       ],
-      "description": "GET requiere EMPLEADO, GERENTE o ADMIN. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+      "description": "GET requiere EMPLEADO, GERENTE o ADMIN. POST/PUT/DELETE requieren GERENTE o ADMIN.\n\nServicio: **catalogo-inventario-service** (`{{catalogo_base_url}}` → http://localhost:8082)."
     },
     {
       "name": "Ventas",
@@ -963,7 +992,7 @@
           "response": []
         }
       ],
-      "description": "Requiere EMPLEADO, GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+      "description": "Requiere EMPLEADO, GERENTE o ADMIN.\n\nServicio: **ventas-service** (`{{base_url}}` → http://localhost:8080)."
     },
     {
       "name": "Detalle Ventas",
@@ -1080,7 +1109,7 @@
           "response": []
         }
       ],
-      "description": "Requiere EMPLEADO, GERENTE o ADMIN.\n\nServicio: **minimarket-app** (`{{base_url}}` → http://localhost:8080)."
+      "description": "Requiere EMPLEADO, GERENTE o ADMIN.\n\nServicio: **ventas-service** (`{{base_url}}` → http://localhost:8080)."
     },
     {
       "name": "Usuarios",
@@ -1201,7 +1230,7 @@
     },
     {
       "name": "Notificaciones",
-      "description": "Servicio: **minimarket-app** (`{{base_url}}`). Promociones requieren GERENTE/ADMIN.",
+      "description": "Servicio: **ventas-service** (`{{base_url}}`). Promociones requieren GERENTE/ADMIN.",
       "item": [
         {
           "name": "Listar mis notificaciones",
@@ -1309,7 +1338,7 @@
     },
     {
       "name": "Análisis de ventas",
-      "description": "Servicio: **minimarket-app** (`{{base_url}}`). Requiere rol de staff (EMPLEADO/GERENTE/ADMIN).",
+      "description": "Servicio: **ventas-service** (`{{base_url}}`). Requiere rol de staff (EMPLEADO/GERENTE/ADMIN).",
       "item": [
         {
           "name": "Productos más vendidos",
@@ -1350,6 +1379,10 @@
     {
       "key": "auth_base_url",
       "value": "http://localhost:8081"
+    },
+    {
+      "key": "catalogo_base_url",
+      "value": "http://localhost:8082"
     },
     {
       "key": "base_url",
