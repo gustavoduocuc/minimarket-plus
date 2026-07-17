@@ -62,4 +62,12 @@ class VentaTest {
         assertEquals(MetodoPago.DEBITO, venta.getMetodoPago());
         assertEquals(EstadoPago.PENDIENTE_PAGO, venta.getEstadoPago());
     }
+
+    @Test
+    void storesTipoEntrega() {
+        Venta venta = new Venta();
+        venta.setTipoEntrega(TipoEntrega.DESPACHO_DOMICILIO);
+
+        assertEquals(TipoEntrega.DESPACHO_DOMICILIO, venta.getTipoEntrega());
+    }
 }

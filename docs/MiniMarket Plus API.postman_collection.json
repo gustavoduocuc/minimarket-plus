@@ -661,7 +661,7 @@
                 "4"
               ]
             },
-            "description": "Concreta la venta del carrito de un tercero. Requiere EMPLEADO, GERENTE o ADMIN. Reemplazar `4` por el usuarioId del cliente."
+            "description": "Concreta la venta del carrito de un tercero. Requiere EMPLEADO, GERENTE o ADMIN. Reemplazar `4` por el usuarioId del cliente. `tipoEntrega` opcional (default RETIRO_EN_TIENDA)."
           },
           "response": []
         },
@@ -677,7 +677,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"metodoPago\": \"EFECTIVO\"\n}"
+              "raw": "{\n  \"metodoPago\": \"EFECTIVO\",\n  \"tipoEntrega\": \"DESPACHO_DOMICILIO\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/carrito/checkout",
@@ -690,7 +690,7 @@
                 "checkout"
               ]
             },
-            "description": "Confirma la compra del carrito del usuario autenticado. `metodoPago` admite EFECTIVO, DEBITO o CREDITO."
+            "description": "Confirma la compra del carrito del usuario autenticado. `metodoPago` admite EFECTIVO, DEBITO o CREDITO. `tipoEntrega` opcional: RETIRO_EN_TIENDA (default) o DESPACHO_DOMICILIO."
           },
           "response": []
         },

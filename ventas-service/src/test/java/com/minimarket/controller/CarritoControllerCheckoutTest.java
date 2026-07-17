@@ -2,6 +2,7 @@ package com.minimarket.controller;
 
 import com.minimarket.entity.EstadoPago;
 import com.minimarket.entity.MetodoPago;
+import com.minimarket.entity.TipoEntrega;
 import com.minimarket.entity.Venta;
 import com.minimarket.service.CarritoCheckoutService;
 import com.minimarket.service.CarritoService;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,8 +58,9 @@ class CarritoControllerCheckoutTest {
         venta.setId(42L);
         venta.setMetodoPago(MetodoPago.DEBITO);
         venta.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
+        venta.setTipoEntrega(TipoEntrega.RETIRO_EN_TIENDA);
 
-        when(carritoCheckoutService.checkout(eq("cliente"), eq(MetodoPago.DEBITO))).thenReturn(venta);
+        when(carritoCheckoutService.checkout(eq("cliente"), eq(MetodoPago.DEBITO), isNull())).thenReturn(venta);
 
         mockMvc.perform(post("/api/carrito/checkout")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,6 +68,26 @@ class CarritoControllerCheckoutTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.ventaId").value(42))
                 .andExpect(jsonPath("$.metodoPago").value("DEBITO"))
-                .andExpect(jsonPath("$.estadoPago").value("PENDIENTE_PAGO"));
+                .andExpect(jsonPath("$.estadoPago").value("PENDIENTE_PAGO"))
+                .andExpect(jsonPath("$.tipoEntrega").value("RETIRO_EN_TIENDA"));
+    }
+
+    @Test
+    void checkoutWithTipoEntregaDespachoReturns201() throws Exception {
+        Venta venta = new Venta();
+        venta.setId(43L);
+        venta.setMetodoPago(MetodoPago.EFECTIVO);
+        venta.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
+        venta.setTipoEntrega(TipoEntrega.DESPACHO_DOMICILIO);
+
+        when(carritoCheckoutService.checkout(
+                eq("cliente"), eq(MetodoPago.EFECTIVO), eq(TipoEntrega.DESPACHO_DOMICILIO)))
+                .thenReturn(venta);
+
+        mockMvc.perform(post("/api/carrito/checkout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"metodoPago\":\"EFECTIVO\",\"tipoEntrega\":\"DESPACHO_DOMICILIO\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.tipoEntrega").value("DESPACHO_DOMICILIO"));
     }
 }

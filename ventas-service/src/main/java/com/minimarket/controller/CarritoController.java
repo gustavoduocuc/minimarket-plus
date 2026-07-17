@@ -128,9 +128,10 @@ public class CarritoController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(examples = @ExampleObject(
                             name = "Checkout presencial",
-                            value = "{\"metodoPago\":\"EFECTIVO\"}")))
+                            value = "{\"metodoPago\":\"EFECTIVO\",\"tipoEntrega\":\"RETIRO_EN_TIENDA\"}")))
             @RequestBody CheckoutRequest request) {
-        Venta venta = carritoCheckoutService.checkoutParaUsuario(usuarioId, request.getMetodoPago());
+        Venta venta = carritoCheckoutService.checkoutParaUsuario(
+                usuarioId, request.getMetodoPago(), request.getTipoEntrega());
         return ResponseEntity.status(HttpStatus.CREATED).body(buildCheckoutResponse(venta));
     }
 
@@ -146,12 +147,18 @@ public class CarritoController {
     @PostMapping("/checkout")
     public ResponseEntity<CheckoutResponse> checkout(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    content = @Content(examples = @ExampleObject(
-                            name = "Checkout autogestionado",
-                            value = "{\"metodoPago\":\"DEBITO\"}")))
+                    content = @Content(examples = {
+                            @ExampleObject(
+                                    name = "Checkout autogestionado",
+                                    value = "{\"metodoPago\":\"DEBITO\"}"),
+                            @ExampleObject(
+                                    name = "Despacho a domicilio",
+                                    value = "{\"metodoPago\":\"EFECTIVO\",\"tipoEntrega\":\"DESPACHO_DOMICILIO\"}")
+                    }))
             @RequestBody CheckoutRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Venta venta = carritoCheckoutService.checkout(username, request.getMetodoPago());
+        Venta venta = carritoCheckoutService.checkout(
+                username, request.getMetodoPago(), request.getTipoEntrega());
         return ResponseEntity.status(HttpStatus.CREATED).body(buildCheckoutResponse(venta));
     }
 
@@ -230,6 +237,7 @@ public class CarritoController {
                 venta.getId(),
                 venta.getMetodoPago(),
                 venta.getEstadoPago(),
+                venta.getTipoEntrega(),
                 venta.calculateTotal());
     }
 }

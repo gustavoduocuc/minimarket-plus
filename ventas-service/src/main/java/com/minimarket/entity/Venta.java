@@ -28,6 +28,10 @@ public class Venta {
     @Column(nullable = false)
     private EstadoPago estadoPago;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoEntrega tipoEntrega;
+
     // Getters y Setters
     public Long getId() {
         return id;
@@ -75,6 +79,14 @@ public class Venta {
 
     public void setEstadoPago(EstadoPago estadoPago) {
         this.estadoPago = estadoPago;
+    }
+
+    public TipoEntrega getTipoEntrega() {
+        return tipoEntrega;
+    }
+
+    public void setTipoEntrega(TipoEntrega tipoEntrega) {
+        this.tipoEntrega = tipoEntrega;
     }
 
     public double calculateTotal() {

@@ -122,7 +122,7 @@ class CarritoControllerTest {
         venta.setMetodoPago(MetodoPago.EFECTIVO);
         venta.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
 
-        when(carritoCheckoutService.checkoutParaUsuario(4L, MetodoPago.EFECTIVO)).thenReturn(venta);
+        when(carritoCheckoutService.checkoutParaUsuario(4L, MetodoPago.EFECTIVO, null)).thenReturn(venta);
 
         mockMvc.perform(post("/api/carrito/checkout/4")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)

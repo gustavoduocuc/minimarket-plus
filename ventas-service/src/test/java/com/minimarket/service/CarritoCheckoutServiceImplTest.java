@@ -74,7 +74,7 @@ class CarritoCheckoutServiceImplTest {
         when(carritoRepository.findByUsuarioId(4L)).thenReturn(Optional.empty());
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO));
+                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null));
 
         assertEquals("No hay productos en el carrito", exception.getMessage());
         verify(ventaService, never()).save(any());
@@ -92,7 +92,7 @@ class CarritoCheckoutServiceImplTest {
         ventaGuardada.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
         when(ventaService.save(any(Venta.class))).thenReturn(ventaGuardada);
 
-        Venta resultado = carritoCheckoutService.checkout("cliente", MetodoPago.DEBITO);
+        Venta resultado = carritoCheckoutService.checkout("cliente", MetodoPago.DEBITO, null);
 
         ArgumentCaptor<Venta> ventaCaptor = ArgumentCaptor.forClass(Venta.class);
         verify(ventaService).save(ventaCaptor.capture());
@@ -100,6 +100,7 @@ class CarritoCheckoutServiceImplTest {
 
         assertEquals(MetodoPago.DEBITO, ventaEnviada.getMetodoPago());
         assertEquals(EstadoPago.PENDIENTE_PAGO, ventaEnviada.getEstadoPago());
+        assertEquals(TipoEntrega.RETIRO_EN_TIENDA, ventaEnviada.getTipoEntrega());
         assertEquals(1, ventaEnviada.getDetalles().size());
         assertEquals(1L, ventaEnviada.getDetalles().get(0).getProductoId());
         assertEquals("Cafe", ventaEnviada.getDetalles().get(0).getNombreProducto());
@@ -122,7 +123,7 @@ class CarritoCheckoutServiceImplTest {
         when(productoService.findById(2L)).thenReturn(pan);
         when(ventaService.save(any(Venta.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        carritoCheckoutService.checkout("cliente", MetodoPago.CREDITO);
+        carritoCheckoutService.checkout("cliente", MetodoPago.CREDITO, null);
 
         ArgumentCaptor<Venta> ventaCaptor = ArgumentCaptor.forClass(Venta.class);
         verify(ventaService).save(ventaCaptor.capture());
@@ -138,7 +139,7 @@ class CarritoCheckoutServiceImplTest {
                 .thenThrow(new InsufficientStockException("Cafe", 1, 2));
 
         assertThrows(InsufficientStockException.class, () ->
-                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO));
+                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null));
 
         verify(carritoRepository, never()).delete(requireNonNull(carrito));
     }
@@ -150,7 +151,7 @@ class CarritoCheckoutServiceImplTest {
         when(productoService.findById(1L)).thenReturn(producto);
         when(ventaService.save(any(Venta.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO);
+        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null);
 
         verify(carritoRepository).delete(requireNonNull(carrito));
     }
@@ -165,7 +166,7 @@ class CarritoCheckoutServiceImplTest {
         ventaGuardada.setId(99L);
         when(ventaService.save(any(Venta.class))).thenReturn(ventaGuardada);
 
-        Venta resultado = carritoCheckoutService.checkoutParaUsuario(4L, MetodoPago.EFECTIVO);
+        Venta resultado = carritoCheckoutService.checkoutParaUsuario(4L, MetodoPago.EFECTIVO, null);
 
         assertEquals(99L, resultado.getId());
         verify(carritoRepository).delete(requireNonNull(carrito));
@@ -182,7 +183,7 @@ class CarritoCheckoutServiceImplTest {
         when(productoService.findById(1L)).thenReturn(producto);
         when(ventaService.save(any(Venta.class))).thenReturn(ventaGuardada);
 
-        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO);
+        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null);
 
         verify(paymentProcessor).initiatePayment(ventaGuardada);
     }
@@ -199,10 +200,38 @@ class CarritoCheckoutServiceImplTest {
         when(productoService.findById(1L)).thenReturn(producto);
         when(ventaService.save(any(Venta.class))).thenReturn(ventaGuardada);
 
-        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO);
+        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null);
 
         verify(notificacionService).notificarCambioPedido(
                 ventaGuardada,
                 "Pedido #42 creado, pendiente de pago");
+    }
+
+    @Test
+    void checkout_conDespachoDomicilio_persisteTipoEntrega() {
+        when(usuarioService.ensure("cliente")).thenReturn(usuario);
+        when(carritoRepository.findByUsuarioId(4L)).thenReturn(Optional.of(carrito));
+        when(productoService.findById(1L)).thenReturn(producto);
+        when(ventaService.save(any(Venta.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, TipoEntrega.DESPACHO_DOMICILIO);
+
+        ArgumentCaptor<Venta> ventaCaptor = ArgumentCaptor.forClass(Venta.class);
+        verify(ventaService).save(ventaCaptor.capture());
+        assertEquals(TipoEntrega.DESPACHO_DOMICILIO, ventaCaptor.getValue().getTipoEntrega());
+    }
+
+    @Test
+    void checkout_sinTipoEntrega_usaRetiroEnTiendaPorDefecto() {
+        when(usuarioService.ensure("cliente")).thenReturn(usuario);
+        when(carritoRepository.findByUsuarioId(4L)).thenReturn(Optional.of(carrito));
+        when(productoService.findById(1L)).thenReturn(producto);
+        when(ventaService.save(any(Venta.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null);
+
+        ArgumentCaptor<Venta> ventaCaptor = ArgumentCaptor.forClass(Venta.class);
+        verify(ventaService).save(ventaCaptor.capture());
+        assertEquals(TipoEntrega.RETIRO_EN_TIENDA, ventaCaptor.getValue().getTipoEntrega());
     }
 }

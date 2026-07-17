@@ -77,7 +77,7 @@ class CarritoCheckoutIntegrationTest {
         carritoService.agregarProducto("cliente", null, 1L, 1);
 
         Venta venta = assertDoesNotThrow(() ->
-                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO));
+                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null));
 
         assertNotNull(venta.getId());
         assertEquals(EstadoPago.PENDIENTE_PAGO, venta.getEstadoPago());
@@ -94,7 +94,7 @@ class CarritoCheckoutIntegrationTest {
         long ventasAntes = ventaRepository.count();
 
         assertThrows(CatalogoServiceUnavailableException.class, () ->
-                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO));
+                carritoCheckoutService.checkout("cliente", MetodoPago.EFECTIVO, null));
 
         assertEquals(ventasAntes, ventaRepository.count());
         assertTrue(ventaRepository.findAll().stream()

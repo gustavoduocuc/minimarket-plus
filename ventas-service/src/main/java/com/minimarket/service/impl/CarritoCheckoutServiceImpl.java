@@ -47,24 +47,25 @@ public class CarritoCheckoutServiceImpl implements CarritoCheckoutService {
 
     @Override
     @Transactional
-    public Venta checkout(String username, MetodoPago metodoPago) {
+    public Venta checkout(String username, MetodoPago metodoPago, TipoEntrega tipoEntrega) {
         Usuario usuario = usuarioService.ensure(username);
-        return checkoutCarritoDe(usuario, metodoPago);
+        return checkoutCarritoDe(usuario, metodoPago, tipoEntrega);
     }
 
     @Override
     @Transactional
-    public Venta checkoutParaUsuario(Long usuarioId, MetodoPago metodoPago) {
+    public Venta checkoutParaUsuario(Long usuarioId, MetodoPago metodoPago, TipoEntrega tipoEntrega) {
         Long usuarioIdValido = requireNonNull(usuarioId, "Usuario inválido");
         Usuario usuario = usuarioRepository.findById(usuarioIdValido)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-        return checkoutCarritoDe(usuario, metodoPago);
+        return checkoutCarritoDe(usuario, metodoPago, tipoEntrega);
     }
 
-    private Venta checkoutCarritoDe(Usuario usuario, MetodoPago metodoPago) {
+    private Venta checkoutCarritoDe(Usuario usuario, MetodoPago metodoPago, TipoEntrega tipoEntrega) {
         if (metodoPago == null) {
             throw new IllegalArgumentException("El metodo de pago es obligatorio");
         }
+        TipoEntrega tipoEntregaEfectivo = tipoEntrega != null ? tipoEntrega : TipoEntrega.RETIRO_EN_TIENDA;
 
         Carrito carrito = carritoRepository.findByUsuarioId(usuario.getId())
                 .orElseThrow(() -> new IllegalStateException("No hay productos en el carrito"));
@@ -73,7 +74,7 @@ public class CarritoCheckoutServiceImpl implements CarritoCheckoutService {
             throw new IllegalStateException("No hay productos en el carrito");
         }
 
-        Venta venta = buildVenta(usuario, metodoPago, carrito.getItems());
+        Venta venta = buildVenta(usuario, metodoPago, tipoEntregaEfectivo, carrito.getItems());
         Venta ventaGuardada = ventaService.save(venta);
         notificacionService.notificarCambioPedido(
                 ventaGuardada,
@@ -83,11 +84,16 @@ public class CarritoCheckoutServiceImpl implements CarritoCheckoutService {
         return ventaGuardada;
     }
 
-    private Venta buildVenta(Usuario usuario, MetodoPago metodoPago, List<ItemCarrito> items) {
+    private Venta buildVenta(
+            Usuario usuario,
+            MetodoPago metodoPago,
+            TipoEntrega tipoEntrega,
+            List<ItemCarrito> items) {
         Venta venta = new Venta();
         venta.setUsuario(usuario);
         venta.setFecha(new Date());
         venta.setMetodoPago(metodoPago);
+        venta.setTipoEntrega(tipoEntrega);
         venta.setEstadoPago(EstadoPago.PENDIENTE_PAGO);
 
         List<DetalleVenta> detalles = new ArrayList<>();

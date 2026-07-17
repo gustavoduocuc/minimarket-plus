@@ -5,10 +5,11 @@ Este documento describe el ciclo de vida del pago de una venta en el minimarket,
 ## Estados de una venta
 
 
-| Campo        | Valores                         | Descripcion                          |
-| ------------ | ------------------------------- | ------------------------------------ |
-| `estadoPago` | `PENDIENTE_PAGO`, `PAGADO`      | Estado del cobro de la venta         |
-| `metodoPago` | `EFECTIVO`, `DEBITO`, `CREDITO` | Medio de pago elegido por el cliente |
+| Campo          | Valores                                      | Descripcion                                      |
+| -------------- | -------------------------------------------- | ------------------------------------------------ |
+| `estadoPago`   | `PENDIENTE_PAGO`, `PAGADO`                   | Estado del cobro de la venta                     |
+| `metodoPago`   | `EFECTIVO`, `DEBITO`, `CREDITO`              | Medio de pago elegido por el cliente             |
+| `tipoEntrega`  | `RETIRO_EN_TIENDA`, `DESPACHO_DOMICILIO`     | Preferencia de entrega (opcional en checkout)    |
 
 
 **Importante:** actualmente, el `estadoPago` es independiente del descuento de stock. Al concretar el checkout, el stock se rebaja de inmediato aunque el pago siga pendiente.
@@ -31,10 +32,11 @@ POST /api/carrito/checkout
 Authorization: Bearer <token>
 Content-Type: application/json
 
-{ "metodoPago": "DEBITO" }
+{ "metodoPago": "DEBITO", "tipoEntrega": "DESPACHO_DOMICILIO" }
 ```
 
 - Lee el carrito del usuario autenticado.
+- `tipoEntrega` es opcional; si se omite, queda `RETIRO_EN_TIENDA`.
 - Revalida stock y crea una `Venta` en `PENDIENTE_PAGO`.
 - Descuenta inventario via `VentaService`.
 - Invoca `NotificationPaymentProcessor` (stub: no cobra, deja pendiente).
