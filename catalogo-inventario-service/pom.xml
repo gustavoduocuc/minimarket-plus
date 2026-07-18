@@ -97,6 +97,7 @@
 					<excludes>
 						<exclude>**/CatalogoInventarioApplication.class</exclude>
 						<exclude>**/config/CatalogoDataInitializer.class</exclude>
+						<exclude>**/openapi/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
