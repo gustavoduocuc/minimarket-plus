@@ -6,6 +6,7 @@ import com.minimarket.service.InventarioService;
 import com.minimarket.service.ProductoService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -18,19 +19,19 @@ import java.util.Map;
 public class HttpInventarioService implements InventarioService {
 
     private final RestClient catalogoRestClient;
-    private final BearerTokenPropagator bearerTokenPropagator;
     private final ProductoService productoService;
     private final ObjectMapper objectMapper;
+    private final String catalogoInternalToken;
 
     public HttpInventarioService(
             RestClient catalogoRestClient,
-            BearerTokenPropagator bearerTokenPropagator,
             ProductoService productoService,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            @Value("${catalogo.internal-token:MiniMarketInternalTokenLocal}") String catalogoInternalToken) {
         this.catalogoRestClient = catalogoRestClient;
-        this.bearerTokenPropagator = bearerTokenPropagator;
         this.productoService = productoService;
         this.objectMapper = objectMapper;
+        this.catalogoInternalToken = catalogoInternalToken;
     }
 
     @Override
@@ -42,8 +43,8 @@ public class HttpInventarioService implements InventarioService {
     public void registrarSalida(Long productoId, int cantidad) {
         try {
             catalogoRestClient.post()
-                    .uri("/api/inventario/salidas")
-                    .headers(bearerTokenPropagator.fromCurrentRequest())
+                    .uri("/internal/inventario/salidas")
+                    .header("X-Internal-Token", catalogoInternalToken)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of("productoId", productoId, "cantidad", cantidad))
                     .retrieve()

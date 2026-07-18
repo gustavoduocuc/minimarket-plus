@@ -3,12 +3,18 @@ package com.minimarket.exception;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -55,5 +61,44 @@ class GlobalExceptionHandlerTest {
         Map<String, String> body = response.getBody();
         assertNotNull(body);
         assertEquals("Catálogo-inventario no disponible al descontar stock", body.get("error"));
+    }
+
+    @Test
+    void handleBusinessRuleReturns422Response() {
+        ResponseEntity<Map<String, String>> response =
+                handler.handleBusinessRule(new IllegalStateException("No se puede confirmar"));
+
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        Map<String, String> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("No se puede confirmar", body.get("error"));
+    }
+
+    @Test
+    void handleInvalidRequestReturns400WithClientMessage() {
+        InvalidRequestException exception = new InvalidRequestException("Datos inválidos", "detalle interno");
+
+        ResponseEntity<Map<String, String>> response = handler.handleInvalidRequest(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, String> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("Datos inválidos", body.get("error"));
+    }
+
+    @Test
+    void handleValidationReturns400WithFieldErrors() {
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(
+                new FieldError("request", "cantidad", "must be greater than 0")));
+        MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
+        when(exception.getBindingResult()).thenReturn(bindingResult);
+
+        ResponseEntity<Map<String, String>> response = handler.handleValidation(exception);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, String> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("cantidad: must be greater than 0", body.get("error"));
     }
 }

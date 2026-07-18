@@ -103,6 +103,8 @@
 					<excludes>
 						<exclude>**/VentasServiceApplication.class</exclude>
 						<exclude>**/config/DataInitializer.class</exclude>
+						<exclude>**/openapi/**</exclude>
+						<exclude>**/catalogo/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

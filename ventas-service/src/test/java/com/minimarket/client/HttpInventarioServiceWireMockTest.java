@@ -45,9 +45,9 @@ class HttpInventarioServiceWireMockTest {
                 .build();
         inventarioService = new HttpInventarioService(
                 restClient,
-                new BearerTokenPropagator(),
                 productoService,
-                new ObjectMapper());
+                new ObjectMapper(),
+                "MiniMarketInternalTokenLocal");
     }
 
     @Test
@@ -58,19 +58,20 @@ class HttpInventarioServiceWireMockTest {
 
     @Test
     void registrarSalida_ok_noLanza() {
-        wireMock.stubFor(post(urlEqualTo("/api/inventario/salidas"))
+        wireMock.stubFor(post(urlEqualTo("/internal/inventario/salidas"))
                 .willReturn(aResponse().withStatus(204)));
 
         assertDoesNotThrow(() -> inventarioService.registrarSalida(1L, 2));
 
-        wireMock.verify(postRequestedFor(urlEqualTo("/api/inventario/salidas"))
+        wireMock.verify(postRequestedFor(urlEqualTo("/internal/inventario/salidas"))
+                .withHeader("X-Internal-Token", equalTo("MiniMarketInternalTokenLocal"))
                 .withRequestBody(containing("\"productoId\":1"))
                 .withRequestBody(containing("\"cantidad\":2")));
     }
 
     @Test
     void registrarSalida_stockInsuficiente_lanzaInsufficientStockException() {
-        wireMock.stubFor(post(urlEqualTo("/api/inventario/salidas"))
+        wireMock.stubFor(post(urlEqualTo("/internal/inventario/salidas"))
                 .willReturn(aResponse()
                         .withStatus(422)
                         .withHeader("Content-Type", "application/json")
@@ -88,7 +89,7 @@ class HttpInventarioServiceWireMockTest {
 
     @Test
     void registrarSalida_servicioCaido_lanzaCatalogoServiceUnavailableException() {
-        wireMock.stubFor(post(urlEqualTo("/api/inventario/salidas"))
+        wireMock.stubFor(post(urlEqualTo("/internal/inventario/salidas"))
                 .willReturn(aResponse().withStatus(503)));
 
         assertThrows(CatalogoServiceUnavailableException.class, () ->

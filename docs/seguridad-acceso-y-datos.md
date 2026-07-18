@@ -8,13 +8,13 @@ Documentación operativa de autenticación, políticas de acceso y bases de dato
 |----------|--------|-----|
 | `auth-service` | 8081 | Fuente de verdad de credenciales y roles: login, registro, gestión de usuarios y emisión de JWT |
 | `catalogo-inventario-service` | 8082 | Valida JWT (claims `sub` + `roles`) para catálogo e inventario |
-| `ventas-service` | 8080 | Valida JWT para ventas/carrito/notificaciones; proyección local de usuario (`id` + `username`) solo para FKs; propaga el Bearer al llamar a catálogo |
+| `ventas-service` | 8080 | Valida JWT para ventas/carrito/notificaciones; proyección local de usuario (`id` + `username`) solo para FKs; descuenta stock en catálogo vía `POST /internal/inventario/salidas` con `X-Internal-Token` |
 
 Los tres servicios deben usar el mismo `jwt.secret` (variable de entorno `JWT_SECRET` o valor por defecto en `application.properties`).
 
 **Proyección de usuario en ventas:** `ventas-service` no guarda password ni roles. Tras registro/alta en auth, se hace un `POST /internal/usuarios` best-effort (header `X-Internal-Token`). Si ventas está caído, auth igual responde OK; al primer uso de carrito/checkout se crea la proyección con `ensure` lazy por username del JWT. Los IDs de usuario en ventas son locales (no necesariamente iguales a los de auth). Staff opera carritos ajenos según authorities del JWT, no según una entidad `Rol` local.
 
-Propiedades: `ventas.base-url` / `ventas.internal-token` en auth; `ventas.internal-token` en ventas (mismo valor; en prod vía env `VENTAS_INTERNAL_TOKEN`).
+Propiedades: `ventas.base-url` / `ventas.internal-token` en auth; `ventas.internal-token` en ventas (mismo valor; en prod vía env `VENTAS_INTERNAL_TOKEN`). Descuento de stock: `catalogo.internal-token` en ventas y catálogo (env `CATALOGO_INTERNAL_TOKEN`).
 
 El seed de demo crea usernames en ventas (sin password) y credenciales completas solo en auth. Categorías/productos/stock viven solo en `catalogo-inventario-service`.
 

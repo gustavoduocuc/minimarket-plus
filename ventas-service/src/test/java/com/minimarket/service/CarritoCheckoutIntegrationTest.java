@@ -71,7 +71,7 @@ class CarritoCheckoutIntegrationTest {
 
     @Test
     void checkoutWithWireMockCatalogCompletesWithoutError() {
-        wireMock.stubFor(post(urlEqualTo("/api/inventario/salidas"))
+        wireMock.stubFor(post(urlEqualTo("/internal/inventario/salidas"))
                 .willReturn(aResponse().withStatus(204)));
 
         carritoService.agregarProducto("cliente", null, 1L, 1);
@@ -87,7 +87,7 @@ class CarritoCheckoutIntegrationTest {
 
     @Test
     void checkoutCuandoCatalogoCaidoEnSalida_noDejaVentaPersistidaComoPagada() {
-        wireMock.stubFor(post(urlEqualTo("/api/inventario/salidas"))
+        wireMock.stubFor(post(urlEqualTo("/internal/inventario/salidas"))
                 .willReturn(aResponse().withStatus(503)));
 
         carritoService.agregarProducto("cliente", null, 1L, 1);
