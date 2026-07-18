@@ -1,6 +1,7 @@
 package com.minimarket.service;
 
 import com.minimarket.dto.UsuarioRequestDto;
+import com.minimarket.dto.UsuarioResponseDto;
 import com.minimarket.entity.Rol;
 import com.minimarket.entity.Usuario;
 import com.minimarket.repository.RolRepository;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -23,8 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -124,6 +128,117 @@ class UsuarioServiceImplTest {
         assertNotNull(savedUser.getRoles());
         assertEquals(1, savedUser.getRoles().size());
         assertEquals("CLIENTE", savedUser.getRoles().iterator().next().getNombre());
+    }
+
+    @Test
+    void updateChangesUsernameAndRolesAndReencodesPasswordWhenProvided() {
+        Rol rolCliente = rol("CLIENTE", 2L);
+        Rol rolAdmin = rol("ADMIN", 1L);
+
+        Usuario existing = new Usuario();
+        existing.setId(5L);
+        existing.setUsername("viejo");
+        existing.setPassword(encodedPassword);
+        existing.setRoles(new HashSet<>(Set.of(rolCliente)));
+
+        UsuarioRequestDto dto = new UsuarioRequestDto();
+        dto.setUsername("nuevo");
+        dto.setPassword("NuevaPass123!");
+        dto.setRoles(Set.of("ADMIN"));
+
+        when(usuarioRepository.findById(5L)).thenReturn(Optional.of(existing));
+        when(rolRepository.findByNombre("ADMIN")).thenReturn(Optional.of(rolAdmin));
+        when(passwordEncoder.encode("NuevaPass123!")).thenReturn("$2a$10$newEncodedHash");
+        whenUsuarioSaved(invocation -> Objects.requireNonNull(invocation.getArgument(0, Usuario.class)));
+
+        Optional<UsuarioResponseDto> result = usuarioService.update(5L, dto);
+
+        assertTrue(result.isPresent());
+        assertEquals("nuevo", result.get().getUsername());
+        assertTrue(result.get().getRoles().contains("ADMIN"));
+
+        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
+        Usuario savedUser = verifyUsuarioSaved(usuarioCaptor);
+        assertEquals("nuevo", savedUser.getUsername());
+        assertEquals("$2a$10$newEncodedHash", savedUser.getPassword());
+    }
+
+    @Test
+    void updateKeepsExistingPasswordWhenBlank() {
+        Rol rolCliente = rol("CLIENTE", 2L);
+        Usuario existing = new Usuario();
+        existing.setId(5L);
+        existing.setUsername("cliente");
+        existing.setPassword(encodedPassword);
+        existing.setRoles(new HashSet<>(Set.of(rolCliente)));
+
+        UsuarioRequestDto dto = new UsuarioRequestDto();
+        dto.setUsername("cliente");
+        dto.setPassword("   ");
+        dto.setRoles(Set.of());
+
+        when(usuarioRepository.findById(5L)).thenReturn(Optional.of(existing));
+        whenUsuarioSaved(invocation -> Objects.requireNonNull(invocation.getArgument(0, Usuario.class)));
+
+        usuarioService.update(5L, dto);
+
+        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
+        Usuario savedUser = verifyUsuarioSaved(usuarioCaptor);
+        assertEquals(encodedPassword, savedUser.getPassword());
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    @Test
+    void saveExistingUserKeepsPasswordWhenBlank() {
+        Usuario existing = new Usuario();
+        existing.setId(3L);
+        existing.setUsername("cliente");
+        existing.setPassword(encodedPassword);
+
+        Usuario toSave = new Usuario();
+        toSave.setId(3L);
+        toSave.setUsername("cliente");
+        toSave.setPassword(" ");
+
+        when(usuarioRepository.findById(3L)).thenReturn(Optional.of(existing));
+        whenUsuarioSaved(invocation -> Objects.requireNonNull(invocation.getArgument(0, Usuario.class)));
+
+        usuarioService.save(toSave);
+
+        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
+        Usuario savedUser = verifyUsuarioSaved(usuarioCaptor);
+        assertEquals(encodedPassword, savedUser.getPassword());
+        verify(passwordEncoder, never()).encode(anyString());
+    }
+
+    @Test
+    void saveExistingUserReencodesRawPassword() {
+        Usuario existing = new Usuario();
+        existing.setId(3L);
+        existing.setUsername("cliente");
+        existing.setPassword(encodedPassword);
+
+        Usuario toSave = new Usuario();
+        toSave.setId(3L);
+        toSave.setUsername("cliente");
+        toSave.setPassword("Password123!");
+
+        when(usuarioRepository.findById(3L)).thenReturn(Optional.of(existing));
+        when(passwordEncoder.encode("Password123!")).thenReturn("$2a$10$reencoded");
+        whenUsuarioSaved(invocation -> Objects.requireNonNull(invocation.getArgument(0, Usuario.class)));
+
+        usuarioService.save(toSave);
+
+        ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
+        Usuario savedUser = verifyUsuarioSaved(usuarioCaptor);
+        assertEquals("$2a$10$reencoded", savedUser.getPassword());
+    }
+
+    private static Rol rol(String nombre, Long id) {
+        Rol rol = new Rol();
+        rol.setId(id);
+        rol.setNombre(nombre);
+        return rol;
     }
 
     @SuppressWarnings("null")

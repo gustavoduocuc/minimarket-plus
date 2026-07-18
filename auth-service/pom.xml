@@ -103,6 +103,7 @@
 					<excludes>
 						<exclude>**/AuthServiceApplication.class</exclude>
 						<exclude>**/config/AuthDataInitializer.class</exclude>
+						<exclude>**/openapi/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
