@@ -50,8 +50,7 @@ class SecurityRbacIntegrationTest {
         return Stream.of(
                 catalogMovedToOtherServiceScenarios(),
                 cartScenarios(),
-                salesScenarios(),
-                publicScenarios()
+                salesScenarios()
         ).flatMap(stream -> stream);
     }
 
@@ -120,13 +119,6 @@ class SecurityRbacIntegrationTest {
         );
     }
 
-    private static Stream<RbacScenario> publicScenarios() {
-        return Stream.of(
-                RbacScenario.of(HttpMethod.GET, "/public/hola", null, AccessOutcome.PUBLIC),
-                RbacScenario.of(HttpMethod.GET, "/public/hola", TestRole.CLIENTE, AccessOutcome.PUBLIC)
-        );
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("rbacScenarios")
     void enforcesRoleBasedAccess(RbacScenario scenario) throws Exception {
@@ -157,7 +149,6 @@ class SecurityRbacIntegrationTest {
 
     private static ResultMatcher matcherFor(AccessOutcome outcome) {
         return switch (outcome) {
-            case PUBLIC -> status().isOk();
             case UNAUTHENTICATED -> status().isUnauthorized();
             case FORBIDDEN -> status().isForbidden();
             case AUTHORIZED -> isAuthorized();

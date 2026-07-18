@@ -225,57 +225,6 @@
       "description": "Endpoints de autenticación (públicos).\n\nServicio: **auth-service** (`{{auth_base_url}}` → http://localhost:8081)."
     },
     {
-      "name": "Público",
-      "item": [
-        {
-          "name": "Hola Mundo (ventas-service)",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/public/hola",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "public",
-                "hola"
-              ]
-            },
-            "description": "Health-check público en ventas-service (:8080)."
-          },
-          "response": []
-        },
-        {
-          "name": "Hola Mundo (auth-service)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{auth_base_url}}/public/hola",
-              "host": [
-                "{{auth_base_url}}"
-              ],
-              "path": [
-                "public",
-                "hola"
-              ]
-            },
-            "response": [],
-            "auth": {
-              "type": "noauth"
-            },
-            "description": "Health-check público en auth-service (:8081)."
-          },
-          "response": []
-        }
-      ],
-      "description": "Endpoints públicos sin autenticación.\n\n`/public/hola` existe en ambos servicios. Esta request usa `ventas-service` (`{{base_url}}`)."
-    },
-    {
       "name": "Productos",
       "item": [
         {

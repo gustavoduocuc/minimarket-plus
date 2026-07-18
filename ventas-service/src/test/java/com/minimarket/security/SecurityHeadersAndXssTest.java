@@ -19,21 +19,21 @@ class SecurityHeadersAndXssTest {
 
     @Test
     void xFrameOptionsHeaderIsDeny() throws Exception {
-        mockMvc.perform(get("/public/hola"))
+        mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Frame-Options", "DENY"));
     }
 
     @Test
     void xContentTypeOptionsHeaderIsNosniff() throws Exception {
-        mockMvc.perform(get("/public/hola"))
+        mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Content-Type-Options", "nosniff"));
     }
 
     @Test
     void contentSecurityPolicyHeaderIsPresent() throws Exception {
-        mockMvc.perform(get("/public/hola"))
+        mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Security-Policy", "default-src 'self'"));
     }

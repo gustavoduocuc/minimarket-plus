@@ -57,7 +57,6 @@ public class SecurityConfig {
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/inventario/**").hasAnyRole("EMPLEADO", "GERENTE", "ADMIN")

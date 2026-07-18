@@ -80,7 +80,6 @@ Cada servicio tiene su propia H2 en memoria.
 | GET inventario | — | — | Si | Si | Si |
 | POST/PUT/DELETE inventario | — | — | — | Si | Si |
 | POST `/api/inventario/salidas` | — | — | Si | Si | Si |
-| /public/** | Si | Si | Si | Si | Si |
 
 ### ventas-service (:8080)
 
@@ -89,7 +88,6 @@ Cada servicio tiene su propia H2 en memoria.
 | Carrito | — | Si | — | — | Si |
 | Ventas / detalle ventas | — | — | Si | Si | Si |
 | Notificaciones | — | Si | Si | Si | Si |
-| /public/** | Si | Si | Si | Si | Si |
 
 ### auth-service (:8081)
 
